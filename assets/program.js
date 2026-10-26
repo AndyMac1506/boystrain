@@ -38,7 +38,7 @@ window.BT_PROGRAM = {
         title: 'Speed + jump + basketball',
         duration: '~30–35 min',
         weekdayHint: 'Mon',
-        focusLabel: 'Speed+jump+basketball',
+        focusLabel: 'Speed+legs+hoops',
         steps: [
           {
             title: 'Warm-up / movement prep (5 min)',
@@ -56,9 +56,9 @@ window.BT_PROGRAM = {
               '3–5× 15–20 yd all-out sprints with walk-back rest (full recovery). Standing or falling start. Cue: Push the ground away, tall posture, pump arms. Rest until breathing calms — not conditioning.'
           },
           {
-            title: 'Strength circuit (8–10 min)',
+            title: 'Strength circuit — legs emphasis (8–10 min)',
             detail:
-              '2–3 rounds: bodyweight squat ×8 · elevated push-up (bench/wall) ×5–8 · glute bridge ×8 · bird-dog ×5/side. Rest ~45–60 sec between rounds.'
+              '2–3 rounds (~8–12 quality lower-body efforts): bodyweight squat ×8 · glute bridge ×8 · calf raises ×8–10 · wall sit 15–25 sec · elevated push-up ×5–8 · bird-dog ×5/side. Pogos above count as power. Rest 45–60 sec. Cue: knees over toes; quiet feet; sit tall on wall. No backpacks/weights.'
           },
           {
             title: 'Sport skill — basketball (5–10 min)',
@@ -73,10 +73,10 @@ window.BT_PROGRAM = {
         ]
       },
       B: {
-        title: 'Agility + strength + baseball',
+        title: 'Agility + legs + baseball',
         duration: '~30–40 min',
         weekdayHint: 'Wed',
-        focusLabel: 'Agility+strength+baseball',
+        focusLabel: 'Agility+legs+baseball',
         steps: [
           {
             title: 'Warm-up (5 min)',
@@ -89,9 +89,9 @@ window.BT_PROGRAM = {
               'Cone/bottle setup: (1) short shuttle 3–4 reps with full rest; (2) zigzag 4–5 cones, plant outside foot, 3 reps; (3) ladder or chalk boxes — in-in-out-out or icky shuffle 2–3 passes. Cue: Stop under control before you go. Eyes up.'
           },
           {
-            title: 'Strength (8 min)',
+            title: 'Strength — legs emphasis (8–10 min)',
             detail:
-              '2–3 rounds: reverse lunges ×5/leg · crab walk 10 yd · dead-bug ×6/side · side plank 10–15 sec/side (knees ok). Quality over hero reps.'
+              '2–3 rounds: reverse lunges ×5/leg · split squat or low step-ups (curb/stair) ×5/leg · optional single-leg glute bridge ×5/leg · crab walk 10 yd · dead-bug ×6/side · side plank 10–15 sec/side. Front knee over mid-foot; soft stick on step-ups. ~8–12 lower-body efforts.'
           },
           {
             title: 'Sport skill — baseball (5–10 min)',
@@ -105,10 +105,10 @@ window.BT_PROGRAM = {
         ]
       },
       C: {
-        title: 'Athleticism + ball skills',
+        title: 'Athleticism + legs + ball skills',
         duration: '~25–35 min',
         weekdayHint: 'Fri',
-        focusLabel: 'Athleticism+ball skills',
+        focusLabel: 'Athleticism+legs+ball',
         steps: [
           {
             title: 'Warm-up games (5 min)',
@@ -120,9 +120,9 @@ window.BT_PROGRAM = {
               'Single-leg stands (eyes open) 3×10–15 sec/leg · hop forward stick 5/leg · skip for height 2×15 yd · throw/catch on one foot (tennis ball) 8–10 catches.'
           },
           {
-            title: 'General athleticism relays (8–10 min)',
+            title: 'Athleticism relays — legs stations (8–10 min)',
             detail:
-              'Pick 3: broad jump + stick · bear crawl 10 yd · sprint to cone + backpedal · kick-pass-chase with a ball. Race Dad sometimes — win some, lose some.'
+              'Always broad jump + stick. Add 1–2: soft lateral bounds (stick each) · squat or wall sit between relays. Optional ONLY if squat form perfect: goblet squat light water bottle ×5 — prefer no load. Then pick 1 more: bear crawl · sprint+backpedal · kick-pass-chase. Race Dad sometimes — win some, lose some.'
           },
           {
             title: 'Sport skill rotate (5–10 min) — pick one',
@@ -142,19 +142,19 @@ window.BT_PROGRAM = {
     label: '4-year-old',
     sessions: {
       A: {
-        title: 'Animal moves + chase',
+        title: 'Animal moves + strong legs',
         duration: '~15–20 min',
         weekdayHint: 'Mon',
-        focusLabel: 'Animals',
+        focusLabel: 'Animals+legs',
         steps: [
           {
             title: 'Warm-up play (3 min)',
             detail: 'Follow-the-leader: march, tip-toe, giant steps. Mirror Dad’s silly faces while moving.'
           },
           {
-            title: 'Animal zoo (5–6 min)',
+            title: 'Animal zoo — strong legs play (5–7 min)',
             detail:
-              'Rotate ~30–45 sec each with rests: bear crawl · frog hops (soft land) · crab walk · penguin waddle · cheetah run to a cone and freeze. Cue: Quiet frog feet on landings.'
+              'Rotate ~30–45 sec each with rests: bear crawl · frog hops (soft land) · kangaroo hops · mountain-climber mountain · crab walk · penguin waddle · cheetah run to a cone and freeze. Extra frog/kangaroo when energy high. Cue: Quiet frog feet on landings.'
           },
           {
             title: 'Chase / speed games (5 min)',
@@ -173,19 +173,19 @@ window.BT_PROGRAM = {
         ]
       },
       B: {
-        title: 'Balance + baseball play',
+        title: 'Balance + strong legs + baseball',
         duration: '~15–20 min',
         weekdayHint: 'Wed',
-        focusLabel: 'Balance+baseball',
+        focusLabel: 'Balance+legs+ball',
         steps: [
           {
             title: 'Warm-up (3 min)',
             detail: 'Walk a chalk line or tape balance beam. Arms out like airplane.'
           },
           {
-            title: 'Balance stations (5–6 min)',
+            title: 'Balance + strong legs play (5–7 min)',
             detail:
-              'Stand on one foot and count to 5 (hold a toy) · hop over a line and stick · sit-to-stand from a low step ×5 · statue freezes after a spin.'
+              'Keep one-foot stands (hold a toy, count to 5) and hop over a line and stick. Add sit-to-stand from a low step several times · invisible chair (wall sit) while counting silly numbers · statue freezes after a spin.'
           },
           {
             title: 'Baseball play block (5–8 min)',
@@ -199,20 +199,20 @@ window.BT_PROGRAM = {
         ]
       },
       C: {
-        title: 'Obstacle + bases game',
+        title: 'Obstacle + legs + bases',
         duration: '~15–20 min',
         weekdayHint: 'Fri',
-        focusLabel: 'Obstacle+bases',
+        focusLabel: 'Obstacle+legs+bases',
         steps: [
           {
             title: 'Build a 4–5 station path (2 min setup)',
             detail:
-              'Example: crawl under a broomstick tunnel → hop 3 chalk circles → balance beam tape → throw ball into laundry basket → sprint to finish high-five.'
+              'Example: crawl under a broomstick tunnel → frog/kangaroo hop 3 chalk circles → balance beam tape → carry stuffed animal up 2–3 stairs/curb → throw ball into laundry basket → sprint to finish high-five. Keep hop or stairs/carry in the mix each week.'
           },
           {
             title: 'Run the course (6–8 min)',
             detail:
-              '3–5 trips with rest between. Change one station each week so it stays novel. Let him help design a station — ownership equals buy-in. Keep course short so there is room for bases.'
+              '3–5 trips with rest between. Include frog/kangaroo hop circles and a stuffed-animal stair/curb carry somewhere in the path each week. Change one other station weekly so it stays novel. Let him help design a station — ownership equals buy-in. Keep course short so there is room for bases.'
           },
           {
             title: 'Run the bases game (5–8 min)',
@@ -249,9 +249,9 @@ window.BT_PROGRAM = {
         older: 'Zigzag cuts + short shuttle'
       },
       {
-        name: 'Strength',
-        younger: 'Bear / crab / frog animals',
-        older: 'Squats, push-ups, bridges circuit'
+        name: 'Strength / legs',
+        younger: 'Frog + kangaroo; sit-to-stand; invisible-chair; stuffed-animal stair carry',
+        older: 'Squats + bridges + calf raises + wall sit; reverse lunges + split squat/step-ups; broad jump + soft lateral bounds'
       },
       {
         name: 'Basketball',
@@ -272,18 +272,23 @@ window.BT_PROGRAM = {
   },
 
   safety: {
-    hard: 'Adult supervision every session. Soft ball for Ezra; no unsupervised hard batting; adult toss/tee only. No barbells, no max lifts, no forced stretching into pain. Soft surface preferred for jumps. Hydrate. Stop for sharp pain, limping, or tears that aren’t just nerves.',
+    hard: 'Adult supervision every session. Soft ball for Ezra; no unsupervised hard batting; adult toss/tee only. Soft landings; knees over toes. No barbells, no backpacks/weights, no max lifts, no forced stretching into pain. Soft surface preferred for jumps. Hydrate. Stop for sharp knee pain (vs tired muscles), limping, or tears that aren’t just nerves.',
     green: [
       'Breathing hard but can still smile or talk between efforts',
       'Soft, quiet landings; knees track roughly over toes',
       'Asking to do one more or laughing during games'
     ],
     stop: [
-      'Sharp pain (vs tired muscles)',
+      'Sharp knee or joint pain (vs tired muscles)',
       'Limping, swelling, or favoring a joint',
       'Dizziness / unusual shortness of breath',
       'Emotional shutdown — end early'
     ]
+  },
+
+  legPriority: {
+    title: 'Leg strength priority',
+    body: 'Bodyweight + jump + single-leg work. Quality over load — about 8–12 quality leg efforts per session. Soft landings, knees over toes. No barbells or weighted backpacks.'
   },
 
   baseline: {

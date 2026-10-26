@@ -281,6 +281,7 @@
         </div>
         <h2 class="session-title">${escapeHtml(sess.title)}</h2>
         <p class="session-meta">${escapeHtml(prog.label)} · default ${escapeHtml(sess.weekdayHint)}</p>
+        ${P.legPriority ? `<div class="callout" style="margin-top:4px"><strong>${escapeHtml(P.legPriority.title)}</strong>${escapeHtml(P.legPriority.body)}</div>` : ''}
         <ol class="steps">
           ${sess.steps.map((s, i) => `
             <li class="step">
@@ -325,6 +326,7 @@
       </div>
       <h2 class="session-title">Same stations, two intensities</h2>
       <p class="session-meta">${escapeHtml(t.note)}</p>
+      ${P.legPriority ? `<div class="callout" style="margin-top:4px"><strong>${escapeHtml(P.legPriority.title)}</strong>${escapeHtml(P.legPriority.body)}</div>` : ''}
       <div class="station-table" style="margin-top:8px">
         ${t.stations.map((s) => `
           <div class="station">
@@ -356,16 +358,16 @@
       }
       const titles = mode === 'younger'
         ? {
-            A: (P.younger.sessions.A.focusLabel || 'Animals'),
-            B: (P.younger.sessions.B.focusLabel || 'Balance+baseball'),
-            C: (P.younger.sessions.C.focusLabel || 'Obstacle+bases')
+            A: (P.younger.sessions.A.focusLabel || 'Animals+legs'),
+            B: (P.younger.sessions.B.focusLabel || 'Balance+legs+ball'),
+            C: (P.younger.sessions.C.focusLabel || 'Obstacle+legs+bases')
           }
         : mode === 'together'
           ? { A: 'Together', B: 'Together', C: 'Together' }
           : {
-            A: (P.older.sessions.A.focusLabel || 'Speed+jump+basketball'),
-            B: (P.older.sessions.B.focusLabel || 'Agility+strength+baseball'),
-            C: (P.older.sessions.C.focusLabel || 'Athleticism+ball skills')
+            A: (P.older.sessions.A.focusLabel || 'Speed+legs+hoops'),
+            B: (P.older.sessions.B.focusLabel || 'Agility+legs+baseball'),
+            C: (P.older.sessions.C.focusLabel || 'Athleticism+legs+ball')
           };
       return `<div class="check-pill ${done ? 'done' : ''}"><span class="letter">${L}</span><span class="sub">${titles[L]}${done ? ' · done' : ''}</span></div>`;
     }).join('');
@@ -383,6 +385,12 @@
 
   function renderSafety() {
     $('safety-hard').textContent = P.safety.hard;
+    const legEl = $('leg-priority-body');
+    if (legEl && P.legPriority) {
+      legEl.textContent = P.legPriority.body;
+      const legTitle = $('leg-priority-title');
+      if (legTitle) legTitle.textContent = P.legPriority.title;
+    }
     const eq = $('equipment-list');
     if (eq && Array.isArray(P.equipment)) {
       eq.innerHTML = P.equipment.map((item) => `<li>${escapeHtml(item)}</li>`).join('');

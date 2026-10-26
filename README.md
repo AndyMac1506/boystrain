@@ -16,7 +16,8 @@ Hard-refresh or reopen the Home Screen app after updates so the new service work
 
 ## Features
 
-- Modes: **John Andrew** (A/B/C + basketball/baseball skills), **Ezra** (play A/B/C + soft-ball/bases), **Together** (shared stations incl. ball sports, two intensities)
+- Modes: **John Andrew** (A/B/C + basketball/baseball skills + leg-strength emphasis), **Ezra** (play A/B/C + soft-ball/bases + strong-legs play), **Together** (shared stations incl. ball sports + Strength/legs, two intensities)
+- **Leg strength priority**: bodyweight + jump + single-leg; ~8–12 quality leg efforts/session; no barbells
 - Default schedule Mon=A / Wed=B / Fri=C (remap in Settings)
 - Full step-by-step session content embedded from the program page
 - Session log: completed / partial / skipped, effort & mood 1–5, duration, notes
