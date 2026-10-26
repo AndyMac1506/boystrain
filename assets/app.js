@@ -15,19 +15,21 @@
       dayB: 3,
       dayC: 5
     },
-    logs: {},       // key: mode|YYYY-MM-DD -> log
-    tests: [],      // John Andrew baseline entries
-    frogs: [],      // Ezra frog jumps
-    overrides: {}   // key: mode|YYYY-MM-DD -> 'A'|'B'|'C'|null
+    logs: {},
+    setLog: {},   // key: mode|YYYY-MM-DD|session → { exerciseId: { done:[bool], times:[num|null] } }
+    tests: [],
+    frogs: [],
+    overrides: {}
   };
 
   let state = loadState();
   let currentDate = todayISO();
-  let currentMode = 'older'; // older | younger | together
-  let view = 'main'; // main | baseline | history | settings
+  let currentMode = 'older';
+  let view = 'main';
   let editingTestId = null;
   let pushupStyle = 'full';
   let saveTimer = null;
+  let timesKidFilter = 'older';
 
   // ---------- persistence ----------
   function loadState() {
@@ -38,6 +40,7 @@
       return {
         settings: { ...DEFAULTS.settings, ...(parsed.settings || {}) },
         logs: parsed.logs || {},
+        setLog: parsed.setLog || {},
         tests: Array.isArray(parsed.tests) ? parsed.tests : [],
         frogs: Array.isArray(parsed.frogs) ? parsed.frogs : [],
         overrides: parsed.overrides || {}
@@ -124,6 +127,10 @@
     return `${mode || currentMode}|${iso}`;
   }
 
+  function setLogKey(iso, mode, session) {
+    return `${mode || currentMode}|${iso}|${session || 'X'}`;
+  }
+
   function effectiveLetter(iso, mode) {
     const ov = state.overrides[logKey(iso, mode)];
     if (ov === '' || ov === 'rest') return null;
@@ -151,6 +158,121 @@
     schedulePersist();
   }
 
+  // ---------- set / time logging ----------
+  function ensureSetEntry(iso, mode, session, exerciseId, sets) {
+    const k = setLogKey(iso, mode, session);
+    if (!state.setLog[k]) state.setLog[k] = {};
+    const day = state.setLog[k];
+    if (!day[exerciseId]) {
+      day[exerciseId] = {
+        done: Array(sets).fill(false),
+        times: Array(sets).fill(null)
+      };
+    } else {
+      // grow/shrink arrays if programmed sets changed
+      while (day[exerciseId].done.length < sets) day[exerciseId].done.push(false);
+      while (day[exerciseId].times.length < sets) day[exerciseId].times.push(null);
+    }
+    return day[exerciseId];
+  }
+
+  function getSetEntry(iso, mode, session, exerciseId) {
+    const k = setLogKey(iso, mode, session);
+    return state.setLog[k]?.[exerciseId] || null;
+  }
+
+  function toggleSetDone(iso, mode, session, exerciseId, setIndex, sets) {
+    const entry = ensureSetEntry(iso, mode, session, exerciseId, sets);
+    entry.done[setIndex] = !entry.done[setIndex];
+    schedulePersist();
+  }
+
+  function setSetTime(iso, mode, session, exerciseId, setIndex, sets, value) {
+    const entry = ensureSetEntry(iso, mode, session, exerciseId, sets);
+    if (value === '' || value == null) {
+      entry.times[setIndex] = null;
+    } else {
+      const n = Number(value);
+      entry.times[setIndex] = Number.isFinite(n) ? n : null;
+      if (entry.times[setIndex] != null) entry.done[setIndex] = true;
+    }
+    schedulePersist();
+  }
+
+  function collectTimeHistory(kidFilter) {
+    // Returns [{ metricId, label, kind, points: [{date, value, best, times}] }]
+    const catalog = {};
+    (P.timedMetrics || []).forEach((m) => {
+      if (kidFilter && kidFilter !== 'all' && m.kid !== kidFilter) return;
+      catalog[m.id] = { id: m.id, label: m.label, kind: m.kind || 'lower', kid: m.kid, byDate: {} };
+    });
+
+    // Also discover any timed entries from setLog not in catalog
+    Object.keys(state.setLog).forEach((k) => {
+      const parts = k.split('|');
+      if (parts.length < 3) return;
+      const [mode, date] = parts;
+      const day = state.setLog[k];
+      Object.keys(day).forEach((exId) => {
+        const entry = day[exId];
+        const times = (entry.times || []).filter((t) => t != null && Number.isFinite(Number(t))).map(Number);
+        if (!times.length) return;
+
+        let kid = mode === 'younger' ? 'younger' : 'older';
+        let metricId = exId;
+        if (mode === 'together') {
+          if (exId.endsWith('-younger')) {
+            kid = 'younger';
+            metricId = exId;
+          } else if (exId.endsWith('-older')) {
+            kid = 'older';
+            metricId = exId;
+          }
+        }
+        if (kidFilter && kidFilter !== 'all' && kid !== kidFilter) return;
+
+        if (!catalog[metricId]) {
+          // look up label from program
+          const label = findExerciseLabel(exId) || metricId;
+          catalog[metricId] = { id: metricId, label, kind: 'lower', kid, byDate: {} };
+        }
+        const best = Math.min(...times);
+        catalog[metricId].byDate[date] = {
+          date,
+          value: best,
+          best,
+          times
+        };
+      });
+    });
+
+    return Object.values(catalog).map((m) => ({
+      id: m.id,
+      label: m.label,
+      kind: m.kind,
+      kid: m.kid,
+      points: Object.values(m.byDate).sort((a, b) => a.date.localeCompare(b.date))
+    })).filter((m) => m.points.length > 0 || (P.timedMetrics || []).some((t) => t.id === m.id));
+  }
+
+  function findExerciseLabel(exId) {
+    const tm = (P.timedMetrics || []).find((t) => t.id === exId);
+    if (tm) return tm.label;
+    for (const who of [P.older, P.younger]) {
+      for (const L of ['A', 'B', 'C']) {
+        const sess = who.sessions[L];
+        for (const step of sess.steps || []) {
+          for (const ex of step.exercises || []) {
+            if (ex.id === exId) return ex.chartLabel || ex.name;
+          }
+        }
+      }
+    }
+    const st = (P.together.stations || []).find((s) => exId.startsWith(s.id));
+    if (st) return st.olderChartLabel || st.name;
+    return null;
+  }
+
   // ---------- UI wiring ----------
   function $(id) { return document.getElementById(id); }
 
@@ -172,18 +294,21 @@
     });
   }
 
-  function showView( whic ) {
+  function showView(whic) {
     view = whic;
     $('main-view').classList.toggle('hidden', whic !== 'main');
     $('baseline-panel').classList.toggle('active', whic === 'baseline');
     $('history-panel').classList.toggle('active', whic === 'history');
     $('settings-panel').classList.toggle('active', whic === 'settings');
+    $('times-panel').classList.toggle('active', whic === 'times');
     $('btn-baseline').classList.toggle('active', whic === 'baseline');
     $('btn-history').classList.toggle('active', whic === 'history');
     $('btn-settings').classList.toggle('active', whic === 'settings');
+    $('btn-times').classList.toggle('active', whic === 'times');
     if (whic === 'baseline') renderBaseline();
     if (whic === 'history') renderHistory();
     if (whic === 'settings') renderSettingsForm();
+    if (whic === 'times') renderTimes();
   }
 
   function updateModeLabels() {
@@ -236,6 +361,68 @@
     }
   }
 
+  function renderExerciseBlock(ex, iso, mode, session) {
+    const sets = Math.max(1, Number(ex.sets) || 1);
+    const raw = getSetEntry(iso, mode, session, ex.id);
+    const entry = {
+      done: Array.from({ length: sets }, (_, i) => !!(raw && raw.done && raw.done[i])),
+      times: Array.from({ length: sets }, (_, i) => (raw && raw.times && raw.times[i] != null) ? raw.times[i] : null)
+    };
+    const timed = ex.kind === 'timed';
+    const opt = ex.optional ? ' <span class="ex-optional">optional</span>' : '';
+    const note = ex.note ? `<span class="ex-note">${escapeHtml(ex.note)}</span>` : '';
+
+    let rows = '';
+    for (let i = 0; i < sets; i++) {
+      const done = !!entry.done[i];
+      const timeVal = entry.times[i] != null ? entry.times[i] : '';
+      rows += `<div class="set-row ${done ? 'done' : ''}" data-ex="${escapeHtml(ex.id)}" data-set="${i}">
+        <button type="button" class="set-check ${done ? 'checked' : ''}" data-ex="${escapeHtml(ex.id)}" data-set="${i}" data-sets="${sets}" aria-pressed="${done}" aria-label="Set ${i + 1}">
+          <span class="set-check-mark">${done ? '✓' : ''}</span>
+          <span class="set-check-label">${sets > 1 ? 'Set ' + (i + 1) : 'Done'}</span>
+        </button>
+        ${timed ? `<label class="set-time"><span class="set-time-unit">sec</span><input type="number" inputmode="decimal" step="0.01" min="0" placeholder="—" data-ex="${escapeHtml(ex.id)}" data-set="${i}" data-sets="${sets}" value="${timeVal === '' ? '' : escapeHtml(String(timeVal))}" /></label>` : ''}
+      </div>`;
+    }
+
+    return `<div class="ex-block" data-ex-id="${escapeHtml(ex.id)}">
+      <div class="ex-head">
+        <span class="ex-name">${escapeHtml(ex.name)}${opt}</span>
+        ${note}
+      </div>
+      <div class="set-list">${rows}</div>
+    </div>`;
+  }
+
+  function bindExerciseInteractions(root, iso, mode, session) {
+    root.querySelectorAll('.set-check').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const exId = btn.dataset.ex;
+        const setIndex = Number(btn.dataset.set);
+        const sets = Number(btn.dataset.sets);
+        toggleSetDone(iso, mode, session, exId, setIndex, sets);
+        // re-render just workout to refresh UI without losing scroll badly
+        const y = window.scrollY;
+        renderWorkout();
+        renderWeekChecklist();
+        window.scrollTo(0, y);
+      });
+    });
+    root.querySelectorAll('.set-time input').forEach((inp) => {
+      const save = () => {
+        const exId = inp.dataset.ex;
+        const setIndex = Number(inp.dataset.set);
+        const sets = Number(inp.dataset.sets);
+        setSetTime(iso, mode, session, exId, setIndex, sets, inp.value);
+        const y = window.scrollY;
+        renderWorkout();
+        window.scrollTo(0, y);
+      };
+      inp.addEventListener('change', save);
+      inp.addEventListener('blur', save);
+    });
+  }
+
   function renderWorkout() {
     const body = $('workout-body');
     const letter = effectiveLetter(currentDate, currentMode);
@@ -244,7 +431,6 @@
 
     let html = '';
 
-    // override controls
     html += `<p class="field-label">Do session now</p>`;
     html += `<div class="override-row" id="override-row">`;
     ['A', 'B', 'C'].forEach((L) => {
@@ -287,6 +473,7 @@
             <li class="step">
               <h4><span class="step-n">${i + 1}</span>${escapeHtml(s.title)}</h4>
               <p>${escapeHtml(s.detail)}</p>
+              ${(s.exercises || []).map((ex) => renderExerciseBlock(ex, currentDate, currentMode, letter)).join('')}
             </li>
           `).join('')}
         </ol>
@@ -305,6 +492,12 @@
       renderAll();
     });
 
+    if (currentMode === 'together') {
+      bindTogetherInteractions(body, letter);
+    } else if (letter) {
+      bindExerciseInteractions(body, currentDate, currentMode, letter);
+    }
+
     $('log-session-tag').textContent = letter
       ? `Logging Session ${letter} · ${currentMode === 'together' ? 'Together' : (currentMode === 'older' ? nameOlder() : nameYounger())}`
       : `Logging rest/off day · ${currentMode === 'together' ? 'Together' : (currentMode === 'older' ? nameOlder() : nameYounger())}`;
@@ -318,6 +511,7 @@
 
   function renderTogether(letter) {
     const t = P.together;
+    const session = letter || 'T';
     return `
       <div class="badge-row" style="margin-top:8px">
         <span class="badge">Together</span>
@@ -327,18 +521,50 @@
       <h2 class="session-title">Same stations, two intensities</h2>
       <p class="session-meta">${escapeHtml(t.note)}</p>
       ${P.legPriority ? `<div class="callout" style="margin-top:4px"><strong>${escapeHtml(P.legPriority.title)}</strong>${escapeHtml(P.legPriority.body)}</div>` : ''}
-      <div class="station-table" style="margin-top:8px">
-        ${t.stations.map((s) => `
+      <div class="station-table" style="margin-top:8px" id="together-stations">
+        ${t.stations.map((s) => {
+          const ySets = Math.max(1, Number(s.youngerSets) || 1);
+          const oSets = Math.max(1, Number(s.olderSets) || 1);
+          const yEx = {
+            id: s.id + '-younger',
+            name: nameYounger(),
+            kind: 'check',
+            sets: ySets,
+            optional: s.optional
+          };
+          const oEx = {
+            id: s.id + '-older',
+            name: nameOlder(),
+            kind: s.olderTimed ? 'timed' : 'check',
+            sets: oSets,
+            optional: s.optional,
+            note: s.olderTimed ? 'programmed: ' + oSets : '',
+            chartLabel: s.olderChartLabel
+          };
+          return `
           <div class="station">
-            <div class="station-name">${escapeHtml(s.name)}</div>
-            <div class="station-lanes">
-              <div class="lane"><strong>${escapeHtml(nameYounger())}</strong>${escapeHtml(s.younger)}</div>
-              <div class="lane"><strong>${escapeHtml(nameOlder())}</strong>${escapeHtml(s.older)}</div>
+            <div class="station-name">${escapeHtml(s.name)}${s.optional ? ' <span class="ex-optional">pick one</span>' : ''}</div>
+            <div class="station-lanes station-lanes-stack">
+              <div class="lane">
+                <strong>${escapeHtml(nameYounger())}</strong>
+                <span class="lane-detail">${escapeHtml(s.younger)}</span>
+                ${renderExerciseBlock(yEx, currentDate, 'together', session)}
+              </div>
+              <div class="lane">
+                <strong>${escapeHtml(nameOlder())}</strong>
+                <span class="lane-detail">${escapeHtml(s.older)}</span>
+                ${renderExerciseBlock(oEx, currentDate, 'together', session)}
+              </div>
             </div>
-          </div>
-        `).join('')}
+          </div>`;
+        }).join('')}
       </div>
     `;
+  }
+
+  function bindTogetherInteractions(root, letter) {
+    const session = letter || 'T';
+    bindExerciseInteractions(root, currentDate, 'together', session);
   }
 
   function renderWeekChecklist() {
@@ -412,6 +638,34 @@
     });
   }
 
+  // ---------- Times panel ----------
+  function renderTimes() {
+    setSeg('times-kid-seg', timesKidFilter);
+    const who = timesKidFilter === 'younger' ? nameYounger()
+      : timesKidFilter === 'older' ? nameOlder()
+      : 'Both kids';
+    $('times-panel-sub').textContent = `${who} — workout max-effort times over days`;
+
+    const body = $('times-body');
+    const metrics = collectTimeHistory(timesKidFilter);
+    const withData = metrics.filter((m) => m.points.length > 0);
+
+    if (!withData.length) {
+      body.innerHTML = `<div class="empty">No timed reps yet. During a workout, enter seconds next to sprint or shuttle checkboxes — best time each day shows up here.</div>`;
+      return;
+    }
+
+    body.innerHTML = withData.map((m) => {
+      const pts = m.points.map((p) => ({ date: p.date, value: p.best }));
+      const kidTag = m.kid === 'younger' ? nameYounger() : nameOlder();
+      if (pts.length === 1) {
+        return `<div class="chart-wrap"><h4>${escapeHtml(m.label)} <span style="color:var(--text-dim);font-weight:500">(${escapeHtml(kidTag)} · sec)</span></h4>
+          <div class="chart-empty">One day logged (${formatNum(pts[0].value)}s on ${escapeHtml(pts[0].date)}) — more sessions for a trend.</div></div>`;
+      }
+      return `<div class="chart-wrap"><h4>${escapeHtml(m.label)} <span style="color:var(--text-dim);font-weight:500">(${escapeHtml(kidTag)} · best sec)</span></h4>${sparklineSVG(pts, m.kind || 'lower')}</div>`;
+    }).join('');
+  }
+
   // ---------- baseline ----------
   function uid() {
     return 't_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -478,7 +732,6 @@
   }
 
   function renderBaseline() {
-    // history
     const hist = $('test-history');
     const sorted = [...state.tests].sort((a, b) => b.date.localeCompare(a.date));
     if (!sorted.length) {
@@ -683,6 +936,7 @@
           state = {
             settings: { ...DEFAULTS.settings, ...(data.settings || {}) },
             logs: data.logs || {},
+            setLog: data.setLog || {},
             tests: Array.isArray(data.tests) ? data.tests : [],
             frogs: Array.isArray(data.frogs) ? data.frogs : [],
             overrides: data.overrides || {}
@@ -690,6 +944,7 @@
         } else {
           state.settings = { ...state.settings, ...(data.settings || {}) };
           state.logs = { ...state.logs, ...(data.logs || {}) };
+          state.setLog = { ...state.setLog, ...(data.setLog || {}) };
           state.overrides = { ...state.overrides, ...(data.overrides || {}) };
           const byId = new Map(state.tests.map((t) => [t.id, t]));
           (data.tests || []).forEach((t) => byId.set(t.id || uid(), t));
@@ -701,6 +956,7 @@
         persist(true);
         renderAll();
         if (view === 'baseline') renderBaseline();
+        if (view === 'times') renderTimes();
         alert('Import complete.');
       } catch {
         alert('Could not read that JSON file.');
@@ -748,9 +1004,11 @@
     $('btn-baseline').addEventListener('click', () => showView(view === 'baseline' ? 'main' : 'baseline'));
     $('btn-history').addEventListener('click', () => showView(view === 'history' ? 'main' : 'history'));
     $('btn-settings').addEventListener('click', () => showView(view === 'settings' ? 'main' : 'settings'));
+    $('btn-times').addEventListener('click', () => showView(view === 'times' ? 'main' : 'times'));
     $('btn-baseline-back').addEventListener('click', () => showView('main'));
     $('btn-history-back').addEventListener('click', () => showView('main'));
     $('btn-settings-back').addEventListener('click', () => showView('main'));
+    $('btn-times-back').addEventListener('click', () => showView('main'));
 
     $('btn-log-test-day').addEventListener('click', () => {
       showView('baseline');
@@ -787,6 +1045,11 @@
     });
 
     bindSeg('pushup-style-seg', (v) => { pushupStyle = v; setSeg('pushup-style-seg', v); });
+    bindSeg('times-kid-seg', (v) => {
+      timesKidFilter = v;
+      setSeg('times-kid-seg', v);
+      renderTimes();
+    });
     $('btn-save-test').addEventListener('click', saveTestDay);
     $('btn-clear-test').addEventListener('click', clearTestForm);
     $('btn-save-frog').addEventListener('click', saveFrog);
@@ -806,7 +1069,6 @@
       e.target.value = '';
     });
 
-    // swipe days
     let touchX = null;
     const main = $('main-view');
     main.addEventListener('touchstart', (e) => { touchX = e.changedTouches[0].screenX; }, { passive: true });
@@ -820,13 +1082,11 @@
     }, { passive: true });
   }
 
-  // ---------- SW ----------
   function registerSW() {
     if (!('serviceWorker' in navigator)) return;
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 
-  // boot
   document.addEventListener('DOMContentLoaded', () => {
     bind();
     renderSafety();

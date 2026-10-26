@@ -1,5 +1,5 @@
 /* BoysTrain service worker — offline shell */
-const CACHE = 'boystrain-v3';
+const CACHE = 'boystrain-v4';
 const ASSETS = [
   './',
   './index.html',

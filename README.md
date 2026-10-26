@@ -39,3 +39,10 @@ python3 -m http.server 8791
 ```
 
 Then open `http://localhost:8791` (or the machine IP on the same Wi‑Fi).
+
+## v4 — set checkboxes & timed progress
+- Each exercise shows large per-set tap checkboxes (e.g. 4 sprint boxes).
+- Max-effort work (sprints, shuttles) also has a **sec** time field per set.
+- **Times** tab graphs best-of-day times over sessions (filter by kid).
+- Export/import JSON includes `setLog`.
+
