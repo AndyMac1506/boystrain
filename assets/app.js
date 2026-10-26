@@ -355,10 +355,18 @@
         }
       }
       const titles = mode === 'younger'
-        ? { A: 'Animals', B: 'Balance', C: 'Obstacle' }
+        ? {
+            A: (P.younger.sessions.A.focusLabel || 'Animals'),
+            B: (P.younger.sessions.B.focusLabel || 'Balance+baseball'),
+            C: (P.younger.sessions.C.focusLabel || 'Obstacle+bases')
+          }
         : mode === 'together'
           ? { A: 'Together', B: 'Together', C: 'Together' }
-          : { A: 'Speed', B: 'Agility', C: 'Mix' };
+          : {
+            A: (P.older.sessions.A.focusLabel || 'Speed+jump+basketball'),
+            B: (P.older.sessions.B.focusLabel || 'Agility+strength+baseball'),
+            C: (P.older.sessions.C.focusLabel || 'Athleticism+ball skills')
+          };
       return `<div class="check-pill ${done ? 'done' : ''}"><span class="letter">${L}</span><span class="sub">${titles[L]}${done ? ' · done' : ''}</span></div>`;
     }).join('');
     $('week-hint').textContent = `Week of ${formatLong(start)} · ${mode === 'older' ? nameOlder() : mode === 'younger' ? nameYounger() : 'Together'}`;
@@ -375,6 +383,10 @@
 
   function renderSafety() {
     $('safety-hard').textContent = P.safety.hard;
+    const eq = $('equipment-list');
+    if (eq && Array.isArray(P.equipment)) {
+      eq.innerHTML = P.equipment.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+    }
     const url = P.programPageUrl;
     $('program-link').href = url;
     $('settings-program-link').href = url;

@@ -21,13 +21,24 @@ window.BT_PROGRAM = {
     6: 'Optional active play — bike, tag, pickup. Not a workout.'
   },
 
+  equipment: [
+    'Cones or water bottles',
+    'Chalk or tape for lines/boxes',
+    'Playground / tennis ball',
+    'Youth basketball (size 5)',
+    'Soft baseball or foam ball (Ezra)',
+    'Baseball glove (optional)',
+    'Batting tee (optional)'
+  ],
+
   older: {
     label: '8-year-old',
     sessions: {
       A: {
-        title: 'Speed + jump',
-        duration: '~30 min',
+        title: 'Speed + jump + basketball',
+        duration: '~30–35 min',
         weekdayHint: 'Mon',
+        focusLabel: 'Speed+jump+basketball',
         steps: [
           {
             title: 'Warm-up / movement prep (5 min)',
@@ -50,6 +61,11 @@ window.BT_PROGRAM = {
               '2–3 rounds: bodyweight squat ×8 · elevated push-up (bench/wall) ×5–8 · glute bridge ×8 · bird-dog ×5/side. Rest ~45–60 sec between rounds.'
           },
           {
+            title: 'Sport skill — basketball (5–10 min)',
+            detail:
+              '(1) Stationary dribble: ball at hip/waist, fingertips, eyes up — 30–45 sec dominant then weak hand. (2) Walk/jog dribble to cone and back (dominant, then weak). (3) Layup footwork without speed: right-side step right, step left, jump, finish right hand (walk then jog); left side reverses. Start close; add one dribble after footwork is calm. Cue: Ball below hip when moving; eyes up; soft finish.'
+          },
+          {
             title: 'Cool-down play (3–5 min)',
             detail:
               'Easy walk, light stretch (calves, quads, hug knees), then one fun catch or who-can-balance-longest game. End on a win.'
@@ -57,9 +73,10 @@ window.BT_PROGRAM = {
         ]
       },
       B: {
-        title: 'Agility + strength',
-        duration: '~30–35 min',
+        title: 'Agility + strength + baseball',
+        duration: '~30–40 min',
         weekdayHint: 'Wed',
+        focusLabel: 'Agility+strength+baseball',
         steps: [
           {
             title: 'Warm-up (5 min)',
@@ -77,15 +94,21 @@ window.BT_PROGRAM = {
               '2–3 rounds: reverse lunges ×5/leg · crab walk 10 yd · dead-bug ×6/side · side plank 10–15 sec/side (knees ok). Quality over hero reps.'
           },
           {
+            title: 'Sport skill — baseball (5–10 min)',
+            detail:
+              '(1) Catch/throw 8–12 exchanges — glove out, two hands, step with opposite foot. (2) Ground balls: Dad rolls; body in front, alligator hands, throw back 6–10. (3) Optional soft toss or tee 8–12 quality swings. Cue: Eyes on ball; quiet feet before throw.'
+          },
+          {
             title: 'Cool-down (3 min)',
             detail: 'Walk, drink water, name one thing that felt strong today.'
           }
         ]
       },
       C: {
-        title: 'Athleticism mix',
-        duration: '~25–30 min',
+        title: 'Athleticism + ball skills',
+        duration: '~25–35 min',
         weekdayHint: 'Fri',
+        focusLabel: 'Athleticism+ball skills',
         steps: [
           {
             title: 'Warm-up games (5 min)',
@@ -100,6 +123,11 @@ window.BT_PROGRAM = {
             title: 'General athleticism relays (8–10 min)',
             detail:
               'Pick 3: broad jump + stick · bear crawl 10 yd · sprint to cone + backpedal · kick-pass-chase with a ball. Race Dad sometimes — win some, lose some.'
+          },
+          {
+            title: 'Sport skill rotate (5–10 min) — pick one',
+            detail:
+              'Basketball week: cone weave dribble both hands + 5–8 layup approaches each side, or wall/chest pass if no hoop. Baseball week: tee/soft toss 8–12 + 4–6 grounders to first (cone as base). Alternate weeks.'
           },
           {
             title: 'Cool-down (3 min)',
@@ -117,6 +145,7 @@ window.BT_PROGRAM = {
         title: 'Animal moves + chase',
         duration: '~15–20 min',
         weekdayHint: 'Mon',
+        focusLabel: 'Animals',
         steps: [
           {
             title: 'Warm-up play (3 min)',
@@ -133,15 +162,21 @@ window.BT_PROGRAM = {
               'Bubble chase, get-the-scarf, or tag in a tiny zone. Short bursts only. Celebrate every freeze and every stop.'
           },
           {
+            title: 'Optional soft-ball roll (2–3 min)',
+            detail:
+              'Foam/soft ball back and forth, two hands. Skip if done. Bonus play — not required.'
+          },
+          {
             title: 'Cool-down (2–3 min)',
             detail: 'Slow dinosaur walk, then sit and roll a ball back and forth. Done when smiles fade — even at minute 12.'
           }
         ]
       },
       B: {
-        title: 'Balance + throw games',
+        title: 'Balance + baseball play',
         duration: '~15–20 min',
         weekdayHint: 'Wed',
+        focusLabel: 'Balance+baseball',
         steps: [
           {
             title: 'Warm-up (3 min)',
@@ -153,9 +188,9 @@ window.BT_PROGRAM = {
               'Stand on one foot and count to 5 (hold a toy) · hop over a line and stick · sit-to-stand from a low step ×5 · statue freezes after a spin.'
           },
           {
-            title: 'Throw / catch / kick (5 min)',
+            title: 'Baseball play block (5–8 min)',
             detail:
-              'Underhand toss with soft ball, roll to target, gentle kicks into a goal made of two bottles. Keep success rate high — stand close.'
+              'Soft/foam only. Roll catch; underhand huge soft toss close; optional tee soft swings into grass. Never hard pitch. No competitive scorekeeping.'
           },
           {
             title: 'Cool-down (2 min)',
@@ -164,9 +199,10 @@ window.BT_PROGRAM = {
         ]
       },
       C: {
-        title: 'Obstacle adventure',
+        title: 'Obstacle + bases game',
         duration: '~15–20 min',
         weekdayHint: 'Fri',
+        focusLabel: 'Obstacle+bases',
         steps: [
           {
             title: 'Build a 4–5 station path (2 min setup)',
@@ -174,9 +210,14 @@ window.BT_PROGRAM = {
               'Example: crawl under a broomstick tunnel → hop 3 chalk circles → balance beam tape → throw ball into laundry basket → sprint to finish high-five.'
           },
           {
-            title: 'Run the course (8–10 min)',
+            title: 'Run the course (6–8 min)',
             detail:
-              '3–5 trips with rest between. Change one station each week so it stays novel. Let him help design a station — ownership equals buy-in.'
+              '3–5 trips with rest between. Change one station each week so it stays novel. Let him help design a station — ownership equals buy-in. Keep course short so there is room for bases.'
+          },
+          {
+            title: 'Run the bases game (5–8 min)',
+            detail:
+              'Four cones diamond. Race home-to-first through bag; then around bases as silly race. Touch every base. No outs/strikeouts.'
           },
           {
             title: 'Cool-down (2–3 min)',
@@ -190,7 +231,7 @@ window.BT_PROGRAM = {
   together: {
     label: 'Train together',
     duration: '~20–25 min',
-    note: 'Shared stations, two intensity lanes. Older boy can squeeze 1–2 extra sprint reps while younger resets with water or a balance beam walk.',
+    note: 'Shared stations, two intensity lanes. Older boy can squeeze 1–2 extra sprint reps while younger resets with water or a balance beam walk. Pick one ball-sport station per shared day (basketball or baseball — not both).',
     stations: [
       {
         name: 'Speed',
@@ -213,9 +254,14 @@ window.BT_PROGRAM = {
         older: 'Squats, push-ups, bridges circuit'
       },
       {
-        name: 'Skill',
-        younger: 'Roll / underhand toss close',
-        older: 'Catch on one foot, longer throws'
+        name: 'Basketball',
+        younger: 'Roll/bounce soft playground ball to Dad; walk bounce if ready',
+        older: 'Stationary + moving dribble both hands; walk-through layup footwork'
+      },
+      {
+        name: 'Baseball',
+        younger: 'Soft-ball roll/catch; tee/huge soft toss; run bases as race',
+        older: 'Catch/throw; rolled grounders; tee/soft toss swings'
       },
       {
         name: 'Finish',
@@ -226,7 +272,7 @@ window.BT_PROGRAM = {
   },
 
   safety: {
-    hard: 'Adult supervision every session. No barbells, no max lifts, no forced stretching into pain. Soft surface preferred for jumps. Hydrate. Stop for sharp pain, limping, or tears that aren’t just nerves.',
+    hard: 'Adult supervision every session. Soft ball for Ezra; no unsupervised hard batting; adult toss/tee only. No barbells, no max lifts, no forced stretching into pain. Soft surface preferred for jumps. Hydrate. Stop for sharp pain, limping, or tears that aren’t just nerves.',
     green: [
       'Breathing hard but can still smile or talk between efforts',
       'Soft, quiet landings; knees track roughly over toes',
