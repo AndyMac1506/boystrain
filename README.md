@@ -46,3 +46,11 @@ Then open `http://localhost:8791` (or the machine IP on the same Wi‑Fi).
 - **Times** tab graphs best-of-day times over sessions (filter by kid).
 - Export/import JSON includes `setLog`.
 
+
+## v5 — Hitting Fixes (John Andrew)
+
+- **Hitting Fixes section** (bat icon in the top bar, or the "Hitting Fixes" card in John Andrew's view). It covers the 3 problems from the Oct 31 swing video, what's working, the posture setup check, the week-by-week progression, the re-film reminder for Nov 21–28 (from the first-base side), and one card per drill with setup, reps, cues and demo links. The links open in a new tab.
+- **Wednesday Session B, baseball item 3** is now "Hitting fix: this week's drill (~10 min)". It shows the current phase's drills with per-set checkboxes and demo links, plus a button to the full section. Items 1–2 (catch/throw, grounders) are unchanged.
+- **Phases** are computed from the hitting start date: weeks 1–2 hand load + two-tee + line drives, weeks 3–4 front-leg brake + tee stare, week 5+ outside tee + fence. Week 1 is the Monday of the start date's week. The default start is 2026-11-02, and you can edit it in Settings → Hitting Fixes or at the top of the section.
+- **Line-drive score** (hits per round of 10) is logged in the round boxes and graphed in Times, where higher is better.
+- The start date is saved in settings, so export/import includes it. Service worker cache: `boystrain-v5`.

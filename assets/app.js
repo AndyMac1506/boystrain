@@ -13,7 +13,8 @@
       nameYounger: 'Ezra',
       dayA: 1,
       dayB: 3,
-      dayC: 5
+      dayC: 5,
+      hittingStart: (window.BT_PROGRAM && window.BT_PROGRAM.hitting && window.BT_PROGRAM.hitting.defaultStart) || '2026-11-02'
     },
     logs: {},
     setLog: {},   // key: mode|YYYY-MM-DD|session → { exerciseId: { done:[bool], times:[num|null] } }
@@ -105,6 +106,67 @@
     const diff = day === 0 ? -6 : 1 - day;
     d.setDate(d.getDate() + diff);
     return toISO(d);
+  }
+
+  // ---------- hitting fixes phase ----------
+  function hittingStart() {
+    const v = state.settings.hittingStart;
+    return /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : (P.hitting ? P.hitting.defaultStart : '2026-11-02');
+  }
+
+  /** Returns { week, phase, preStart } for a date. Week 1 starts on the start date's Monday. */
+  function hittingPhaseFor(iso) {
+    const H = P.hitting;
+    const startMon = weekStartMonday(hittingStart());
+    const days = Math.round((parseISO(iso) - parseISO(startMon)) / 86400000);
+    const week = Math.floor(days / 7) + 1;
+    const preStart = week < 1;
+    const w = preStart ? 1 : week;
+    const phase = H.phases.find((ph) => w >= ph.fromWeek && (ph.toWeek == null || w <= ph.toWeek)) || H.phases[H.phases.length - 1];
+    return { week, phase, preStart };
+  }
+
+  function hittingDrill(key) {
+    return P.hitting.drills.find((d) => d.key === key);
+  }
+
+  function refilmStatus(iso) {
+    const r = P.hitting.refilm;
+    if (iso >= r.from && iso <= r.to) return 'now';
+    if (iso < r.from) return 'upcoming';
+    return 'past';
+  }
+
+  function linkList(links) {
+    return `<ul class="hf-links">${links.map((l) => `<li><a href="${escapeHtml(l.href)}" target="_blank" rel="noopener noreferrer"><span class="hf-link-title">▶ ${escapeHtml(l.title)}</span><span class="hf-link-site">${escapeHtml(l.site)} ↗</span></a></li>`).join('')}</ul>`;
+  }
+
+  function renderHittingWorkoutBlock(iso, mode, session) {
+    const H = P.hitting;
+    const { week, phase, preStart } = hittingPhaseFor(iso);
+    const weekLabel = preStart
+      ? `Starts ${formatLong(weekStartMonday(hittingStart()))} · preview of week 1`
+      : `Week ${week} · phase weeks ${phase.weeks}`;
+    const rf = refilmStatus(iso);
+    const drillLinks = phase.drills.map((k) => {
+      const d = hittingDrill(k);
+      return `<div class="hf-mini"><p class="hf-mini-title">${d.n}. ${escapeHtml(d.title)}</p>${linkList(d.links)}</div>`;
+    }).join('');
+    return `<div class="hf-block" id="hf-workout-block">
+      <div class="hf-block-head">
+        <span class="hf-block-title">Hitting fix — this week’s drill (~10 min)</span>
+        <div class="badge-row" style="margin-top:4px">
+          <span class="badge">${escapeHtml(weekLabel)}</span>
+          ${rf === 'now' ? '<span class="badge warn">Re-film this week</span>' : ''}
+        </div>
+      </div>
+      <p class="hf-main"><strong>${escapeHtml(phase.main)}</strong><br><span>${escapeHtml(phase.supporting)}</span></p>
+      <p class="hf-small">${escapeHtml(H.postureCue)}</p>
+      ${phase.exercises.map((ex) => renderExerciseBlock(ex, iso, mode, session)).join('')}
+      <p class="field-label" style="margin-top:10px">Demo videos</p>
+      ${drillLinks}
+      <button type="button" class="ghost-btn hf-open" data-hf-open="${escapeHtml(phase.drills[0])}">Full Hitting Fixes →</button>
+    </div>`;
   }
 
   // ---------- names / schedule ----------
@@ -204,7 +266,7 @@
     const catalog = {};
     (P.timedMetrics || []).forEach((m) => {
       if (kidFilter && kidFilter !== 'all' && m.kid !== kidFilter) return;
-      catalog[m.id] = { id: m.id, label: m.label, kind: m.kind || 'lower', kid: m.kid, byDate: {} };
+      catalog[m.id] = { id: m.id, label: m.label, kind: m.kind || 'lower', unit: m.unit || 'sec', kid: m.kid, byDate: {} };
     });
 
     // Also discover any timed entries from setLog not in catalog
@@ -234,9 +296,10 @@
         if (!catalog[metricId]) {
           // look up label from program
           const label = findExerciseLabel(exId) || metricId;
-          catalog[metricId] = { id: metricId, label, kind: 'lower', kid, byDate: {} };
+          const tm = (P.timedMetrics || []).find((t) => t.id === metricId);
+          catalog[metricId] = { id: metricId, label, kind: (tm && tm.kind) || 'lower', unit: (tm && tm.unit) || 'sec', kid, byDate: {} };
         }
-        const best = Math.min(...times);
+        const best = catalog[metricId].kind === 'higher' ? Math.max(...times) : Math.min(...times);
         catalog[metricId].byDate[date] = {
           date,
           value: best,
@@ -250,6 +313,7 @@
       id: m.id,
       label: m.label,
       kind: m.kind,
+      unit: m.unit || 'sec',
       kid: m.kid,
       points: Object.values(m.byDate).sort((a, b) => a.date.localeCompare(b.date))
     })).filter((m) => m.points.length > 0 || (P.timedMetrics || []).some((t) => t.id === m.id));
@@ -266,6 +330,12 @@
             if (ex.id === exId) return ex.chartLabel || ex.name;
           }
         }
+      }
+    }
+    if (P.hitting) {
+      for (const ph of P.hitting.phases) {
+        const ex = ph.exercises.find((e) => e.id === exId);
+        if (ex) return ex.name;
       }
     }
     const st = (P.together.stations || []).find((s) => exId.startsWith(s.id));
@@ -301,6 +371,8 @@
     $('history-panel').classList.toggle('active', whic === 'history');
     $('settings-panel').classList.toggle('active', whic === 'settings');
     $('times-panel').classList.toggle('active', whic === 'times');
+    $('hitting-panel').classList.toggle('active', whic === 'hitting');
+    $('btn-hitting').classList.toggle('active', whic === 'hitting');
     $('btn-baseline').classList.toggle('active', whic === 'baseline');
     $('btn-history').classList.toggle('active', whic === 'history');
     $('btn-settings').classList.toggle('active', whic === 'settings');
@@ -309,6 +381,7 @@
     if (whic === 'history') renderHistory();
     if (whic === 'settings') renderSettingsForm();
     if (whic === 'times') renderTimes();
+    if (whic === 'hitting') renderHitting();
   }
 
   function updateModeLabels() {
@@ -368,7 +441,8 @@
       done: Array.from({ length: sets }, (_, i) => !!(raw && raw.done && raw.done[i])),
       times: Array.from({ length: sets }, (_, i) => (raw && raw.times && raw.times[i] != null) ? raw.times[i] : null)
     };
-    const timed = ex.kind === 'timed';
+    const timed = ex.kind === 'timed' || ex.kind === 'score';
+    const isScore = ex.kind === 'score';
     const opt = ex.optional ? ' <span class="ex-optional">optional</span>' : '';
     const note = ex.note ? `<span class="ex-note">${escapeHtml(ex.note)}</span>` : '';
 
@@ -379,9 +453,9 @@
       rows += `<div class="set-row ${done ? 'done' : ''}" data-ex="${escapeHtml(ex.id)}" data-set="${i}">
         <button type="button" class="set-check ${done ? 'checked' : ''}" data-ex="${escapeHtml(ex.id)}" data-set="${i}" data-sets="${sets}" aria-pressed="${done}" aria-label="Set ${i + 1}">
           <span class="set-check-mark">${done ? '✓' : ''}</span>
-          <span class="set-check-label">${sets > 1 ? 'Set ' + (i + 1) : 'Done'}</span>
+          <span class="set-check-label">${sets > 1 ? (isScore ? 'Round ' : 'Set ') + (i + 1) : 'Done'}</span>
         </button>
-        ${timed ? `<label class="set-time"><span class="set-time-unit">sec</span><input type="number" inputmode="decimal" step="0.01" min="0" placeholder="—" data-ex="${escapeHtml(ex.id)}" data-set="${i}" data-sets="${sets}" value="${timeVal === '' ? '' : escapeHtml(String(timeVal))}" /></label>` : ''}
+        ${timed ? `<label class="set-time"><span class="set-time-unit">${isScore ? 'hits' : 'sec'}</span><input type="number" inputmode="${isScore ? 'numeric' : 'decimal'}" step="${isScore ? '1' : '0.01'}" min="0" ${isScore ? 'max="10"' : ''} placeholder="—" data-ex="${escapeHtml(ex.id)}" data-set="${i}" data-sets="${sets}" value="${timeVal === '' ? '' : escapeHtml(String(timeVal))}" /></label>` : ''}
       </div>`;
     }
 
@@ -474,6 +548,7 @@
               <h4><span class="step-n">${i + 1}</span>${escapeHtml(s.title)}</h4>
               <p>${escapeHtml(s.detail)}</p>
               ${(s.exercises || []).map((ex) => renderExerciseBlock(ex, currentDate, currentMode, letter)).join('')}
+              ${s.hittingFix && currentMode === 'older' && P.hitting ? renderHittingWorkoutBlock(currentDate, currentMode, letter) : ''}
             </li>
           `).join('')}
         </ol>
@@ -496,6 +571,9 @@
       bindTogetherInteractions(body, letter);
     } else if (letter) {
       bindExerciseInteractions(body, currentDate, currentMode, letter);
+      body.querySelectorAll('[data-hf-open]').forEach((b) => {
+        b.addEventListener('click', () => openHitting(b.dataset.hfOpen));
+      });
     }
 
     $('log-session-tag').textContent = letter
@@ -630,12 +708,128 @@
     updateModeLabels();
     renderDateNav();
     renderBaselinePromo();
+    renderHittingPromo();
     renderWorkout();
     renderWeekChecklist();
     renderLogForm();
     document.querySelectorAll('.mode-btn').forEach((b) => {
       b.classList.toggle('active', b.dataset.mode === currentMode);
     });
+  }
+
+  // ---------- Hitting Fixes panel ----------
+  function openHitting(drillKey) {
+    showView('hitting');
+    window.scrollTo(0, 0);
+    if (drillKey) {
+      const el = document.getElementById('hf-drill-' + drillKey);
+      if (el) {
+        el.open = true;
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+      }
+    }
+  }
+
+  function renderHittingPromo() {
+    const card = $('hitting-promo');
+    if (!card || !P.hitting) return;
+    card.classList.toggle('hidden', currentMode !== 'older');
+    if (currentMode !== 'older') return;
+    const { week, phase, preStart } = hittingPhaseFor(currentDate);
+    $('hitting-promo-name').textContent = nameOlder();
+    $('hitting-promo-week').textContent = preStart ? `Starts ${formatLong(weekStartMonday(hittingStart()))}` : `Week ${week}`;
+    $('hitting-promo-phase').textContent = `This week: ${phase.main}`;
+    const rf = refilmStatus(currentDate);
+    const rfEl = $('hitting-promo-refilm');
+    rfEl.classList.toggle('hidden', rf !== 'now');
+  }
+
+  function renderHitting() {
+    const H = P.hitting;
+    const root = $('hitting-body');
+    const today = todayISO();
+    const { week, phase, preStart } = hittingPhaseFor(today);
+    const start = hittingStart();
+    const rf = refilmStatus(today);
+    $('hitting-panel-sub').textContent = `${nameOlder()} · bats ${H.bats} · ${H.source}`;
+
+    const progRows = H.phases.map((ph) => `
+      <tr class="${ph.key === phase.key ? 'hf-current' : ''}">
+        <td>${escapeHtml(ph.weeks)}</td>
+        <td><strong>${escapeHtml(ph.main)}</strong>${ph.key === phase.key ? ' <span class="badge" style="margin-left:4px">now</span>' : ''}</td>
+        <td>${escapeHtml(ph.supporting)}</td>
+      </tr>`).join('');
+
+    const drills = H.drills.map((d) => {
+      const isNow = phase.drills.includes(d.key);
+      return `<details class="hf-drill" id="hf-drill-${d.key}" ${isNow ? 'open' : ''}>
+        <summary><span class="step-n">${d.n}</span><span class="hf-drill-title">${escapeHtml(d.title)}</span>
+          <span class="hf-drill-weeks">${escapeHtml(d.weeksLabel)}${isNow ? ' · this week' : ''}</span></summary>
+        <ol class="steps hf-steps">
+          ${d.steps.map((st) => `<li class="step"><h4>${escapeHtml(st.title)}</h4><p>${escapeHtml(st.detail)}</p></li>`).join('')}
+        </ol>
+        <p class="field-label" style="margin:10px 0 4px">Demo videos</p>
+        ${linkList(d.links)}
+      </details>`;
+    }).join('');
+
+    root.innerHTML = `
+      <section class="card">
+        <div class="card-body" style="padding-top:14px">
+          <div class="badge-row">
+            <span class="badge">${preStart ? 'Starts ' + escapeHtml(formatLong(weekStartMonday(start))) : 'Week ' + week}</span>
+            <span class="badge muted">Phase weeks ${escapeHtml(phase.weeks)}</span>
+            ${rf === 'now' ? '<span class="badge warn">Re-film this week</span>' : ''}
+          </div>
+          <h3 class="session-title" style="font-size:1.05rem">This week: ${escapeHtml(phase.main)}</h3>
+          <p class="session-meta">${escapeHtml(phase.supporting)}. Runs as item 3 of Wednesday’s Session B baseball block (~10 min).</p>
+          <label class="field">
+            <span class="field-label">Week 1 starts (Monday)</span>
+            <input type="date" id="hf-start-input" value="${escapeHtml(start)}" />
+          </label>
+          <p class="session-meta">${escapeHtml(H.rule)}</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-body" style="padding-top:14px">
+          <h3 class="session-title" style="font-size:1rem">What to fix</h3>
+          <p class="session-meta">${escapeHtml(H.intro)}</p>
+          <ol class="hf-problems">
+            ${H.problems.map((pr) => `<li><strong>${escapeHtml(pr.title)}</strong> — ${escapeHtml(pr.detail)}</li>`).join('')}
+          </ol>
+          <div class="callout"><strong>Keep what’s working</strong>${escapeHtml(H.keep)}</div>
+          <div class="callout"><strong>Posture setup check</strong>${escapeHtml(H.postureCue)}</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-body" style="padding-top:14px">
+          <h3 class="session-title" style="font-size:1rem">Week-by-week progression</h3>
+          <table class="hf-table">
+            <thead><tr><th>Weeks</th><th>Main fix</th><th>Supporting</th></tr></thead>
+            <tbody>${progRows}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="callout ${rf === 'past' ? '' : 'warn'}"><strong>Re-film ${rf === 'now' ? 'this week' : 'Nov 21–28'} · first-base side</strong>${escapeHtml(H.refilm.detail)}</div>
+
+      <h3 class="session-title" style="font-size:1rem;margin-top:4px">Drills</h3>
+      ${drills}
+    `;
+
+    $('hf-start-input').addEventListener('change', (e) => {
+      setHittingStart(e.target.value);
+      renderHitting();
+    });
+  }
+
+  function setHittingStart(v) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v || '')) return;
+    state.settings.hittingStart = v;
+    schedulePersist();
+    renderAll();
   }
 
   // ---------- Times panel ----------
@@ -651,7 +845,7 @@
     const withData = metrics.filter((m) => m.points.length > 0);
 
     if (!withData.length) {
-      body.innerHTML = `<div class="empty">No timed reps yet. During a workout, enter seconds next to sprint or shuttle checkboxes — best time each day shows up here.</div>`;
+      body.innerHTML = `<div class="empty">No timed reps yet. During a workout, enter seconds next to sprint or shuttle checkboxes (or line-drive hits on Wednesday hitting) — best each day shows up here.</div>`;
       return;
     }
 
@@ -659,10 +853,10 @@
       const pts = m.points.map((p) => ({ date: p.date, value: p.best }));
       const kidTag = m.kid === 'younger' ? nameYounger() : nameOlder();
       if (pts.length === 1) {
-        return `<div class="chart-wrap"><h4>${escapeHtml(m.label)} <span style="color:var(--text-dim);font-weight:500">(${escapeHtml(kidTag)} · sec)</span></h4>
-          <div class="chart-empty">One day logged (${formatNum(pts[0].value)}s on ${escapeHtml(pts[0].date)}) — more sessions for a trend.</div></div>`;
+        return `<div class="chart-wrap"><h4>${escapeHtml(m.label)} <span style="color:var(--text-dim);font-weight:500">(${escapeHtml(kidTag)} · ${escapeHtml(m.unit)})</span></h4>
+          <div class="chart-empty">One day logged (${formatNum(pts[0].value)} ${escapeHtml(m.unit)} on ${escapeHtml(pts[0].date)}) — more sessions for a trend.</div></div>`;
       }
-      return `<div class="chart-wrap"><h4>${escapeHtml(m.label)} <span style="color:var(--text-dim);font-weight:500">(${escapeHtml(kidTag)} · best sec)</span></h4>${sparklineSVG(pts, m.kind || 'lower')}</div>`;
+      return `<div class="chart-wrap"><h4>${escapeHtml(m.label)} <span style="color:var(--text-dim);font-weight:500">(${escapeHtml(kidTag)} · best ${escapeHtml(m.unit)})</span></h4>${sparklineSVG(pts, m.kind || 'lower')}</div>`;
     }).join('');
   }
 
@@ -902,6 +1096,7 @@
     $('set-day-A').value = String(state.settings.dayA);
     $('set-day-B').value = String(state.settings.dayB);
     $('set-day-C').value = String(state.settings.dayC);
+    $('set-hitting-start').value = hittingStart();
   }
 
   function applySettingsFromForm() {
@@ -910,6 +1105,8 @@
     state.settings.dayA = Number($('set-day-A').value);
     state.settings.dayB = Number($('set-day-B').value);
     state.settings.dayC = Number($('set-day-C').value);
+    const hs = $('set-hitting-start').value;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(hs)) state.settings.hittingStart = hs;
     schedulePersist();
     updateModeLabels();
     renderAll();
@@ -957,6 +1154,7 @@
         renderAll();
         if (view === 'baseline') renderBaseline();
         if (view === 'times') renderTimes();
+        if (view === 'hitting') renderHitting();
         alert('Import complete.');
       } catch {
         alert('Could not read that JSON file.');
@@ -1005,6 +1203,9 @@
     $('btn-history').addEventListener('click', () => showView(view === 'history' ? 'main' : 'history'));
     $('btn-settings').addEventListener('click', () => showView(view === 'settings' ? 'main' : 'settings'));
     $('btn-times').addEventListener('click', () => showView(view === 'times' ? 'main' : 'times'));
+    $('btn-hitting').addEventListener('click', () => showView(view === 'hitting' ? 'main' : 'hitting'));
+    $('btn-hitting-back').addEventListener('click', () => showView('main'));
+    $('btn-open-hitting').addEventListener('click', () => openHitting());
     $('btn-baseline-back').addEventListener('click', () => showView('main'));
     $('btn-history-back').addEventListener('click', () => showView('main'));
     $('btn-settings-back').addEventListener('click', () => showView('main'));
@@ -1054,7 +1255,7 @@
     $('btn-clear-test').addEventListener('click', clearTestForm);
     $('btn-save-frog').addEventListener('click', saveFrog);
 
-    ['set-name-older', 'set-name-younger', 'set-day-A', 'set-day-B', 'set-day-C'].forEach((id) => {
+    ['set-name-older', 'set-name-younger', 'set-day-A', 'set-day-B', 'set-day-C', 'set-hitting-start'].forEach((id) => {
       $(id).addEventListener('change', applySettingsFromForm);
       $(id).addEventListener('input', () => {
         if (id.startsWith('set-name')) applySettingsFromForm();

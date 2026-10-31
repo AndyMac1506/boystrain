@@ -154,12 +154,12 @@ window.BT_PROGRAM = {
           {
             title: 'Sport skill — baseball (5–10 min)',
             detail:
-              '(1) Catch/throw 8–12 exchanges — glove out, two hands, step with opposite foot. (2) Ground balls: Dad rolls; body in front, alligator hands, throw back 6–10. (3) Optional soft toss or tee 8–12 quality swings. Cue: Eyes on ball; quiet feet before throw.',
+              '(1) Catch/throw 8–12 exchanges — glove out, two hands, step with opposite foot. (2) Ground balls: Dad rolls; body in front, alligator hands, throw back 6–10. (3) Hitting: run this week’s drill from Hitting Fixes (from swing video, Oct 31) — about 10 min, one fix at a time — instead of general tee swings. Cue: Eyes on ball; quiet feet before throw.',
             exercises: [
               { id: 'ob-catch', name: 'Catch / throw', kind: 'check', sets: 1, note: '8–12' },
-              { id: 'ob-grounders', name: 'Ground balls', kind: 'check', sets: 1, note: '6–10' },
-              { id: 'ob-tee', name: 'Soft toss / tee', kind: 'check', sets: 1, note: 'optional 8–12', optional: true }
-            ]
+              { id: 'ob-grounders', name: 'Ground balls', kind: 'check', sets: 1, note: '6–10' }
+            ],
+            hittingFix: true
           },
           {
             title: 'Cool-down (3 min)',
@@ -467,10 +467,168 @@ window.BT_PROGRAM = {
     ]
   },
 
+  /** John Andrew hitting fixes — from the Page section "Hitting Fixes (from swing video, Oct 31)" */
+  hitting: {
+    title: 'Hitting Fixes',
+    source: 'From swing video, Oct 31',
+    defaultStart: '2026-11-02',
+    bats: 'right-handed',
+    intro:
+      'From the rear and first-base-side front-toss video (John Andrew bats right-handed). This block replaces general tee swings in Wednesday’s baseball time, about 10 minutes.',
+    keep: 'Wide athletic stance, straight stride, front foot down on time, good back-foot pivot, strong two-hand finish.',
+    problems: [
+      { title: 'No hand load', detail: 'Hands stay put or drop as he strides, so the bat pushes forward and down and the swing gets steep and choppy.' },
+      { title: 'Tall upright posture', detail: 'A very tall, upright posture at setup. Fixed with a setup check, not a drill (see below).' },
+      { title: 'Soft front leg at contact', detail: 'He spins open and the front shoulder and head pull off, worst on outside pitches.' }
+    ],
+    postureCue:
+      'Tall posture: at setup, cue chest over toes, a slight bend at the hips so the letters on his jersey are over his knees. That one is a setup check, not a drill.',
+    rule: 'One new fix at a time. Only move on when the current fix shows up on most swings without a reminder.',
+    refilm: {
+      from: '2026-11-21',
+      to: '2026-11-28',
+      detail:
+        'Around Nov 21–28, film 10–15 front-toss swings from the first-base side, facing his chest and hands, at hip height and the same distance as before. Add a rear view if you can. Send it over and we will compare the hand load and bat path to the Oct 31 video.'
+    },
+    phases: [
+      {
+        key: 'p1', weeks: '1–2', fromWeek: 1, toWeek: 2,
+        main: 'Hand load: walk away from your hands',
+        supporting: 'Two-tee drill; line drives to the top of the net as the scoreboard',
+        drills: ['load', 'linedrives'],
+        exercises: [
+          { id: 'hf-load-dry', name: 'Hand load — dry stride-and-load holds', kind: 'check', sets: 2, note: '2×5 · freeze 2-count at landing' },
+          { id: 'hf-load-tee', name: 'Hand load tee reps + two-tee', kind: 'check', sets: 2, note: '2×6–8 · miss the back tee' },
+          { id: 'hf-linedrives', name: 'Line drives to top of net', kind: 'score', sets: 3, note: '3 rounds × 10 · enter hits at/above target' }
+        ]
+      },
+      {
+        key: 'p2', weeks: '3–4', fromWeek: 3, toWeek: 4,
+        main: 'Front-leg brake: land soft, then post up',
+        supporting: 'Keep 5 load reps as warm-up; tee stare on every swing',
+        drills: ['brake', 'teestare'],
+        exercises: [
+          { id: 'hf-load-warm', name: 'Hand load warm-up reps', kind: 'check', sets: 1, note: '5 reps' },
+          { id: 'hf-brake', name: 'Front-leg brake tee swings', kind: 'check', sets: 3, note: '3×5 · 3 slow-mo first, build to ~75%' },
+          { id: 'hf-teestare', name: 'Tee stare on every swing', kind: 'check', sets: 1, note: '~10–15 swings · eyes on tee 2-count' }
+        ]
+      },
+      {
+        key: 'p3', weeks: '5+', fromWeek: 5, toWeek: null,
+        main: 'Outside-tee opposite-field reps + fence drill',
+        supporting: 'Rotate in tee stare and line-drive scoring; keep the load and brake as warm-ups',
+        drills: ['outside', 'fence'],
+        exercises: [
+          { id: 'hf-warmups', name: 'Load + brake warm-up', kind: 'check', sets: 1 },
+          { id: 'hf-outside', name: 'Outside-tee opposite-field reps', kind: 'check', sets: 2, note: '2×6–8 · front shoulder stays home' },
+          { id: 'hf-fence', name: 'Fence drill slow swings', kind: 'check', sets: 2, note: '2×6–8 · speed up after 5 clean' },
+          { id: 'hf-teestare', name: 'Tee stare (rotate in)', kind: 'check', sets: 1, note: 'eyes on tee 2-count', optional: true },
+          { id: 'hf-linedrives', name: 'Line-drive scoring (rotate in)', kind: 'score', sets: 3, note: '3 rounds × 10 · hits at/above target', optional: true }
+        ]
+      }
+    ],
+    drills: [
+      {
+        key: 'load', n: 1,
+        title: 'Hand load — walk away from your hands',
+        weeksLabel: 'weeks 1–2',
+        steps: [
+          { title: 'Setup', detail: 'Normal stance, bat on shoulder or hands at the back shoulder. Stand him sideways to a mirror, window, or your phone camera so he can see his hands.' },
+          { title: 'Dry reps (2 sets × 5)', detail: 'Stride slowly and, at the same time, ease the hands back 3–4 inches toward the catcher. Freeze for a 2-count at front-foot landing and check the hands are behind the back shoulder, not dropped or pushed forward. No swing yet.' },
+          { title: 'Tee reps (2 sets × 6–8)', detail: 'Same stride and load, short pause, then swing. Add the two-tee drill: a second tee or a cone about 12 inches behind the ball and about half a ball lower. Swing hard and miss the back tee.' },
+          { title: 'Cues (pick one)', detail: 'Walk away from your hands. Hands go back as the foot goes forward.' },
+          { title: 'What good looks like', detail: 'At landing the front foot is down, the hands are back near the back shoulder, and the barrel stays up. The swing flattens out, he misses the back tee, and the ball comes off as a line drive instead of a chopper.' }
+        ],
+        links: [
+          { title: 'Perfect Positioning | Load Stride Swing Drill', site: 'YouTube · Pro Speed Baseball', href: 'https://www.youtube.com/watch?v=f64FsinnQqc' },
+          { title: 'Two Tee - Swing Path Drill - DON’T lose the barrel | Hitting Done Right', site: 'YouTube · Hitting Done Right - HDR', href: 'https://www.youtube.com/watch?v=5DxC2zZMbqs' },
+          { title: 'Cruz shows you how to perfect the two-tee drill (D-backs Academy)', site: 'MLB.com', href: 'https://www.mlb.com/video/d-backs-academy-two-tee-drill-c1203642783' },
+          { title: 'BVSA Teaches: Med Ball Drill (Loading the Hands)', site: 'bvacademy.com (article)', href: 'https://bvacademy.com/bvsa-teaches-med-ball-drill-loading-the-hands/' }
+        ]
+      },
+      {
+        key: 'brake', n: 2,
+        title: 'Front-leg brake — land soft, then post up',
+        weeksLabel: 'weeks 3–4',
+        steps: [
+          { title: 'Setup', detail: 'Tee at belt height, slightly in front of the front foot’s landing spot. Start with 3 slow-motion swings, then build to about 75% speed.' },
+          { title: 'Reps (3 sets × 5)', detail: 'Stride and land on a slightly bent front knee, then straighten and firm up that leg as the bat comes through. Hold the finish for a 2-count, balanced.' },
+          { title: 'Cues (pick one)', detail: 'Land soft, then post up. Hit against a strong front leg.' },
+          { title: 'What good looks like', detail: 'The front knee goes from bent at landing to nearly straight at contact. The head stays over the plate, the belly button turns to the pitcher, and he does not spin off toward third base.' }
+        ],
+        links: [
+          { title: 'Hitting Drills - Front Leg Post Drill', site: 'YouTube · YouGoProBaseball', href: 'https://www.youtube.com/watch?v=noz-aYI7pXg' },
+          { title: 'Flying Open While Hitting?! Here Are Some Drills To Help!', site: 'YouTube · VLO Baseball', href: 'https://www.youtube.com/watch?v=UsCUcNVrKns' }
+        ]
+      },
+      {
+        key: 'teestare', n: 3,
+        title: 'Tee stare — eyes on the tee for a 2-count',
+        weeksLabel: 'weeks 3–4, then rotate in',
+        steps: [
+          { title: 'Setup', detail: 'Any tee swing. You stand off to the side where you can see his eyes.' },
+          { title: 'Reps', detail: 'Add to every tee swing (about 10–15 a session). After contact his eyes stay on the top of the tee while he counts one-two out loud, then he can look up.' },
+          { title: 'Cues (pick one)', detail: 'See the tee after you hit it. Freeze your eyes.' },
+          { title: 'What good looks like', detail: 'Chin stays near the front shoulder through contact and the front shoulder stays closed longer. If the head pops up before the count, that swing does not count.' }
+        ],
+        links: [
+          { title: 'Youth Hitting Drill To Stop Pulling Off the Ball', site: 'YouTube · Antonelli Baseball', href: 'https://www.youtube.com/watch?v=mC5rRupCo1k' },
+          { title: 'Learn Correct Head Position, Keeping It Still, & Seeing Ball Better While Hitting A Baseball', site: 'YouTube · HittingPerformLab', href: 'https://www.youtube.com/watch?v=avB_ww_lxVw' }
+        ]
+      },
+      {
+        key: 'linedrives', n: 4,
+        title: 'Line drives to the top of the net (the scoreboard)',
+        weeksLabel: 'weeks 1–2, then rotate in',
+        steps: [
+          { title: 'Setup', detail: 'Tape or hang a target (a towel or an X) high on the net, about chest height or above. Tee at belt height.' },
+          { title: 'Reps (3 rounds × 10)', detail: 'Only hard line drives that hit at or above the target count. Write down the score each round and try to beat it next week.' },
+          { title: 'Cue', detail: 'Hit the ball on a rope to the top of the net.' },
+          { title: 'What good looks like', detail: 'Fewer grounders and choppers, more balls that hit the net on a line. A rising score week to week means the load and front-leg fixes are working.' }
+        ],
+        links: [
+          { title: 'Baseball Tee Drill: Line Drives at a Target', site: 'bravara.com (drill page with video)', href: 'https://bravara.com/reps/baseball/tee-line-drives-at-a-target' },
+          { title: 'How To Hit Off The Tee [The Right Way!]', site: 'YouTube · YouGoProBaseball', href: 'https://www.youtube.com/watch?v=pmZjRdtgIQg' }
+        ]
+      },
+      {
+        key: 'outside', n: 5,
+        title: 'Outside-tee reps to the opposite field',
+        weeksLabel: 'weeks 5+',
+        steps: [
+          { title: 'Setup', detail: 'Tee on the outside corner, a little deeper (closer to the catcher) than his normal tee spot.' },
+          { title: 'Reps (2 sets × 6–8)', detail: 'Drive the ball to the right side of the net, which is the opposite field for a righty. Let the ball travel; do not reach out in front for it.' },
+          { title: 'Cue', detail: 'Front shoulder stays home. See the ball hit the bat.' },
+          { title: 'What good looks like', detail: 'The front shoulder and head stay pointed at the tee through contact, the hands stay close to the body, and the back foot pivots instead of dragging. The ball goes hard to the right side, not a roll-over to the left.' }
+        ],
+        links: [
+          { title: 'How to Hit the Outside Pitch (pitchers will HATE this)', site: 'YouTube · icoachbaseball', href: 'https://www.youtube.com/watch?v=-sdabQWZ1kk' },
+          { title: 'Best Tee Drill for POWER (Stay closed!) | Tee Drills for Youth Baseball', site: 'YouTube · TannerTees', href: 'https://www.youtube.com/watch?v=PgEKm444PwQ' }
+        ]
+      },
+      {
+        key: 'fence', n: 6,
+        title: 'Fence drill — stop casting',
+        weeksLabel: 'weeks 5+',
+        steps: [
+          { title: 'Setup', detail: 'He takes his stance facing a fence or the net. Set the knob of the bat against his belly button and the end cap touching the fence, then step into his stance about one bat length away.' },
+          { title: 'Reps (2 sets × 6–8 slow swings)', detail: 'Slow, controlled dry swings without touching the fence. Speed up only when 5 in a row are clean. Back up a few inches if he keeps clipping it.' },
+          { title: 'Cue', detail: 'Knob to the ball, hands stay inside.' },
+          { title: 'What good looks like', detail: 'The hands stay close to his body and the barrel stays behind the hands until late, with no fence contact. This is the fix for hands drifting away on outside pitches.' }
+        ],
+        links: [
+          { title: 'The Fence Drill - Baseball Hitting Drills & Mechanics', site: 'YouTube · Baseball Tutorials', href: 'https://www.youtube.com/watch?v=3RyLpYSzjsQ' },
+          { title: 'Top 10 Hitting Drills To Develop The Perfect Baseball Swing (includes a fence drill)', site: 'YouTube · YouGoProBaseball', href: 'https://www.youtube.com/watch?v=qU11jWWQCA8' }
+        ]
+      }
+    ]
+  },
+
   /** Catalog of timed metrics for the Times progress panel */
   timedMetrics: [
     { id: 'oa-sprints', kid: 'older', label: 'Session A sprints (15–20 yd)', kind: 'lower' },
     { id: 'ob-shuttle', kid: 'older', label: 'Session B short shuttle', kind: 'lower' },
-    { id: 'tg-speed-older', kid: 'older', label: 'Together sprints (15–20 yd)', kind: 'lower' }
+    { id: 'tg-speed-older', kid: 'older', label: 'Together sprints (15–20 yd)', kind: 'lower' },
+    { id: 'hf-linedrives', kid: 'older', label: 'Line-drive score (hits at/above target)', kind: 'higher', unit: 'hits' }
   ]
 };
