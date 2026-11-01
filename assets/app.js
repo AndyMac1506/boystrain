@@ -108,15 +108,18 @@
     return toISO(d);
   }
 
-  // ---------- hitting fixes phase ----------
+  // ---------- hitting + throwing fixes phase (shared start date) ----------
+  const FIX_KINDS = ['hitting', 'throwing'];
+  let fixTab = 'hitting';
+
   function hittingStart() {
     const v = state.settings.hittingStart;
     return /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : (P.hitting ? P.hitting.defaultStart : '2026-11-02');
   }
 
-  /** Returns { week, phase, preStart } for a date. Week 1 starts on the start date's Monday. */
-  function hittingPhaseFor(iso) {
-    const H = P.hitting;
+  /** Returns { week, phase, preStart } for a date and fix kind. Week 1 starts on the start date's Monday. */
+  function fixPhaseFor(kind, iso) {
+    const H = P[kind];
     const startMon = weekStartMonday(hittingStart());
     const days = Math.round((parseISO(iso) - parseISO(startMon)) / 86400000);
     const week = Math.floor(days / 7) + 1;
@@ -125,13 +128,14 @@
     const phase = H.phases.find((ph) => w >= ph.fromWeek && (ph.toWeek == null || w <= ph.toWeek)) || H.phases[H.phases.length - 1];
     return { week, phase, preStart };
   }
+  function hittingPhaseFor(iso) { return fixPhaseFor('hitting', iso); }
 
-  function hittingDrill(key) {
-    return P.hitting.drills.find((d) => d.key === key);
+  function fixDrill(kind, key) {
+    return P[kind].drills.find((d) => d.key === key);
   }
 
-  function refilmStatus(iso) {
-    const r = P.hitting.refilm;
+  function refilmStatus(iso, kind) {
+    const r = P[kind || 'hitting'].refilm;
     if (iso >= r.from && iso <= r.to) return 'now';
     if (iso < r.from) return 'upcoming';
     return 'past';
@@ -141,31 +145,34 @@
     return `<ul class="hf-links">${links.map((l) => `<li><a href="${escapeHtml(l.href)}" target="_blank" rel="noopener noreferrer"><span class="hf-link-title">▶ ${escapeHtml(l.title)}</span><span class="hf-link-site">${escapeHtml(l.site)} ↗</span></a></li>`).join('')}</ul>`;
   }
 
-  function renderHittingWorkoutBlock(iso, mode, session) {
-    const H = P.hitting;
-    const { week, phase, preStart } = hittingPhaseFor(iso);
+  function renderFixWorkoutBlock(kind, iso, mode, session) {
+    const H = P[kind];
+    const { week, phase, preStart } = fixPhaseFor(kind, iso);
     const weekLabel = preStart
       ? `Starts ${formatLong(weekStartMonday(hittingStart()))} · preview of week 1`
       : `Week ${week} · phase weeks ${phase.weeks}`;
-    const rf = refilmStatus(iso);
+    const rf = refilmStatus(iso, kind);
     const drillLinks = phase.drills.map((k) => {
-      const d = hittingDrill(k);
+      const d = fixDrill(kind, k);
       return `<div class="hf-mini"><p class="hf-mini-title">${d.n}. ${escapeHtml(d.title)}</p>${linkList(d.links)}</div>`;
     }).join('');
-    return `<div class="hf-block" id="hf-workout-block">
+    const notes = kind === 'throwing'
+      ? `<p class="hf-small"><strong>Cues:</strong> ${escapeHtml(H.cues)}</p><p class="hf-small hf-safety">${escapeHtml(H.safety)}</p>`
+      : `<p class="hf-small">${escapeHtml(H.postureCue)}</p>`;
+    return `<div class="hf-block hf-${kind}" id="${kind === 'hitting' ? 'hf' : 'tf'}-workout-block">
       <div class="hf-block-head">
-        <span class="hf-block-title">Hitting fix — this week’s drill (~10 min)</span>
+        <span class="hf-block-title">${escapeHtml(H.blockLabel)} — this week’s drill (~10 min)</span>
         <div class="badge-row" style="margin-top:4px">
           <span class="badge">${escapeHtml(weekLabel)}</span>
           ${rf === 'now' ? '<span class="badge warn">Re-film this week</span>' : ''}
         </div>
       </div>
       <p class="hf-main"><strong>${escapeHtml(phase.main)}</strong><br><span>${escapeHtml(phase.supporting)}</span></p>
-      <p class="hf-small">${escapeHtml(H.postureCue)}</p>
+      ${notes}
       ${phase.exercises.map((ex) => renderExerciseBlock(ex, iso, mode, session)).join('')}
       <p class="field-label" style="margin-top:10px">Demo videos</p>
       ${drillLinks}
-      <button type="button" class="ghost-btn hf-open" data-hf-open="${escapeHtml(phase.drills[0])}">Full Hitting Fixes →</button>
+      <button type="button" class="ghost-btn hf-open" data-fix-kind="${kind}" data-hf-open="${escapeHtml(phase.drills[0])}">Full ${escapeHtml(H.title)} →</button>
     </div>`;
   }
 
@@ -332,8 +339,9 @@
         }
       }
     }
-    if (P.hitting) {
-      for (const ph of P.hitting.phases) {
+    for (const kind of FIX_KINDS) {
+      if (!P[kind]) continue;
+      for (const ph of P[kind].phases) {
         const ex = ph.exercises.find((e) => e.id === exId);
         if (ex) return ex.name;
       }
@@ -547,8 +555,9 @@
             <li class="step">
               <h4><span class="step-n">${i + 1}</span>${escapeHtml(s.title)}</h4>
               <p>${escapeHtml(s.detail)}</p>
+              ${s.throwingFix && currentMode === 'older' && P.throwing ? renderFixWorkoutBlock('throwing', currentDate, currentMode, letter) : ''}
               ${(s.exercises || []).map((ex) => renderExerciseBlock(ex, currentDate, currentMode, letter)).join('')}
-              ${s.hittingFix && currentMode === 'older' && P.hitting ? renderHittingWorkoutBlock(currentDate, currentMode, letter) : ''}
+              ${s.hittingFix && currentMode === 'older' && P.hitting ? renderFixWorkoutBlock('hitting', currentDate, currentMode, letter) : ''}
             </li>
           `).join('')}
         </ol>
@@ -572,7 +581,7 @@
     } else if (letter) {
       bindExerciseInteractions(body, currentDate, currentMode, letter);
       body.querySelectorAll('[data-hf-open]').forEach((b) => {
-        b.addEventListener('click', () => openHitting(b.dataset.hfOpen));
+        b.addEventListener('click', () => openFix(b.dataset.fixKind || 'hitting', b.dataset.hfOpen));
       });
     }
 
@@ -717,41 +726,52 @@
     });
   }
 
-  // ---------- Hitting Fixes panel ----------
-  function openHitting(drillKey) {
+  // ---------- Fixes panel (Hitting + Throwing) ----------
+  function openFix(kind, drillKey) {
+    fixTab = FIX_KINDS.includes(kind) && P[kind] ? kind : 'hitting';
     showView('hitting');
     window.scrollTo(0, 0);
     if (drillKey) {
-      const el = document.getElementById('hf-drill-' + drillKey);
+      const el = document.getElementById(`${fixTab === 'hitting' ? 'hf' : 'tf'}-drill-` + drillKey);
       if (el) {
         el.open = true;
         setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
       }
     }
   }
+  function openHitting(drillKey) { openFix('hitting', drillKey); }
 
   function renderHittingPromo() {
     const card = $('hitting-promo');
     if (!card || !P.hitting) return;
     card.classList.toggle('hidden', currentMode !== 'older');
     if (currentMode !== 'older') return;
-    const { week, phase, preStart } = hittingPhaseFor(currentDate);
+    const { week, phase, preStart } = fixPhaseFor('hitting', currentDate);
     $('hitting-promo-name').textContent = nameOlder();
     $('hitting-promo-week').textContent = preStart ? `Starts ${formatLong(weekStartMonday(hittingStart()))}` : `Week ${week}`;
-    $('hitting-promo-phase').textContent = `This week: ${phase.main}`;
-    const rf = refilmStatus(currentDate);
+    $('hitting-promo-phase').textContent = `Hitting this week: ${phase.main}`;
+    const tEl = $('throwing-promo-phase');
+    if (tEl && P.throwing) tEl.textContent = `Throwing this week: ${fixPhaseFor('throwing', currentDate).phase.main}`;
+    const rf = FIX_KINDS.some((k) => P[k] && refilmStatus(currentDate, k) === 'now') ? 'now' : '';
     const rfEl = $('hitting-promo-refilm');
     rfEl.classList.toggle('hidden', rf !== 'now');
   }
 
   function renderHitting() {
-    const H = P.hitting;
+    if (!P[fixTab]) fixTab = 'hitting';
+    const kind = fixTab;
+    const H = P[kind];
+    const pre = kind === 'hitting' ? 'hf' : 'tf';
+    setSeg('fix-tab-seg', kind);
     const root = $('hitting-body');
     const today = todayISO();
-    const { week, phase, preStart } = hittingPhaseFor(today);
+    const { week, phase, preStart } = fixPhaseFor(kind, today);
     const start = hittingStart();
-    const rf = refilmStatus(today);
-    $('hitting-panel-sub').textContent = `${nameOlder()} · bats ${H.bats} · ${H.source}`;
+    const rf = refilmStatus(today, kind);
+    $('hitting-panel-title').textContent = H.title;
+    $('hitting-panel-sub').textContent = kind === 'hitting'
+      ? `${nameOlder()} · bats ${H.bats} · ${H.source}`
+      : `${nameOlder()} · throws ${H.throws} · ${H.source}`;
 
     const progRows = H.phases.map((ph) => `
       <tr class="${ph.key === phase.key ? 'hf-current' : ''}">
@@ -762,8 +782,8 @@
 
     const drills = H.drills.map((d) => {
       const isNow = phase.drills.includes(d.key);
-      return `<details class="hf-drill" id="hf-drill-${d.key}" ${isNow ? 'open' : ''}>
-        <summary><span class="step-n">${d.n}</span><span class="hf-drill-title">${escapeHtml(d.title)}</span>
+      return `<details class="hf-drill" id="${pre}-drill-${d.key}" ${isNow ? 'open' : ''}>
+        <summary><span class="step-n">${escapeHtml(String(d.n))}</span><span class="hf-drill-title">${escapeHtml(d.title)}</span>
           <span class="hf-drill-weeks">${escapeHtml(d.weeksLabel)}${isNow ? ' · this week' : ''}</span></summary>
         <ol class="steps hf-steps">
           ${d.steps.map((st) => `<li class="step"><h4>${escapeHtml(st.title)}</h4><p>${escapeHtml(st.detail)}</p></li>`).join('')}
@@ -772,6 +792,12 @@
         ${linkList(d.links)}
       </details>`;
     }).join('');
+
+    const extraCallouts = kind === 'hitting'
+      ? `<div class="callout"><strong>Posture setup check</strong>${escapeHtml(H.postureCue)}</div>`
+      : `<div class="callout"><strong>Cues</strong>${escapeHtml(H.cues)}</div>
+         <div class="callout warn"><strong>Easy throws · arm care</strong>${escapeHtml(H.safety)}</div>
+         <div class="callout"><strong>Grip</strong>${escapeHtml(H.gripNote)}</div>`;
 
     root.innerHTML = `
       <section class="card">
@@ -782,9 +808,9 @@
             ${rf === 'now' ? '<span class="badge warn">Re-film this week</span>' : ''}
           </div>
           <h3 class="session-title" style="font-size:1.05rem">This week: ${escapeHtml(phase.main)}</h3>
-          <p class="session-meta">${escapeHtml(phase.supporting)}. Runs as item 3 of Wednesday’s Session B baseball block (~10 min).</p>
+          <p class="session-meta">${escapeHtml(phase.supporting)}. ${escapeHtml(H.wedSlot)}</p>
           <label class="field">
-            <span class="field-label">Week 1 starts (Monday)</span>
+            <span class="field-label">Week 1 starts (Monday) · shared by Hitting + Throwing</span>
             <input type="date" id="hf-start-input" value="${escapeHtml(start)}" />
           </label>
           <p class="session-meta">${escapeHtml(H.rule)}</p>
@@ -799,7 +825,7 @@
             ${H.problems.map((pr) => `<li><strong>${escapeHtml(pr.title)}</strong> — ${escapeHtml(pr.detail)}</li>`).join('')}
           </ol>
           <div class="callout"><strong>Keep what’s working</strong>${escapeHtml(H.keep)}</div>
-          <div class="callout"><strong>Posture setup check</strong>${escapeHtml(H.postureCue)}</div>
+          ${extraCallouts}
         </div>
       </section>
 
@@ -807,13 +833,13 @@
         <div class="card-body" style="padding-top:14px">
           <h3 class="session-title" style="font-size:1rem">Week-by-week progression</h3>
           <table class="hf-table">
-            <thead><tr><th>Weeks</th><th>Main fix</th><th>Supporting</th></tr></thead>
+            <thead><tr><th>Weeks</th><th>${kind === 'hitting' ? 'Main fix' : 'Main drills'}</th><th>${kind === 'hitting' ? 'Supporting' : 'Focus'}</th></tr></thead>
             <tbody>${progRows}</tbody>
           </table>
         </div>
       </section>
 
-      <div class="callout ${rf === 'past' ? '' : 'warn'}"><strong>Re-film ${rf === 'now' ? 'this week' : 'Nov 21–28'} · first-base side</strong>${escapeHtml(H.refilm.detail)}</div>
+      <div class="callout ${rf === 'past' ? '' : 'warn'}"><strong>Re-film ${rf === 'now' ? 'this week' : 'Nov 21–28'} · ${escapeHtml(H.refilm.label)}</strong>${escapeHtml(H.refilm.detail)}</div>
 
       <h3 class="session-title" style="font-size:1rem;margin-top:4px">Drills</h3>
       ${drills}
@@ -1205,7 +1231,9 @@
     $('btn-times').addEventListener('click', () => showView(view === 'times' ? 'main' : 'times'));
     $('btn-hitting').addEventListener('click', () => showView(view === 'hitting' ? 'main' : 'hitting'));
     $('btn-hitting-back').addEventListener('click', () => showView('main'));
-    $('btn-open-hitting').addEventListener('click', () => openHitting());
+    $('btn-open-hitting').addEventListener('click', () => openFix('hitting'));
+    $('btn-open-throwing')?.addEventListener('click', () => openFix('throwing'));
+    bindSeg('fix-tab-seg', (v) => { fixTab = v; renderHitting(); window.scrollTo(0, 0); });
     $('btn-baseline-back').addEventListener('click', () => showView('main'));
     $('btn-history-back').addEventListener('click', () => showView('main'));
     $('btn-settings-back').addEventListener('click', () => showView('main'));

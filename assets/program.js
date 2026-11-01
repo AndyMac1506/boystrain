@@ -154,11 +154,12 @@ window.BT_PROGRAM = {
           {
             title: 'Sport skill — baseball (5–10 min)',
             detail:
-              '(1) Catch/throw 8–12 exchanges — glove out, two hands, step with opposite foot. (2) Ground balls: Dad rolls; body in front, alligator hands, throw back 6–10. (3) Hitting: run this week’s drill from Hitting Fixes (from swing video, Oct 31) — about 10 min, one fix at a time — instead of general tee swings. Cue: Eyes on ball; quiet feet before throw.',
+              '(1) Catch / throw: start with about 10 min of this week’s drill from Throwing Fixes (from throwing video, Oct 31), then 8–12 easy exchanges at a comfortable distance — two hands to secure, step at the target, pull the glove into the chest, finish with the belly button to the target. (2) Ground balls: Dad rolls; body in front, alligator hands, throw back 6–10. (3) Hitting: run this week’s drill from Hitting Fixes (from swing video, Oct 31) — about 10 min, one fix at a time — instead of general tee swings. Cue: Eyes on ball; quiet feet before throw.',
             exercises: [
-              { id: 'ob-catch', name: 'Catch / throw', kind: 'check', sets: 1, note: '8–12' },
+              { id: 'ob-catch', name: 'Catch / throw — easy exchanges', kind: 'check', sets: 1, note: '8–12 after the throwing drill' },
               { id: 'ob-grounders', name: 'Ground balls', kind: 'check', sets: 1, note: '6–10' }
             ],
+            throwingFix: true,
             hittingFix: true
           },
           {
@@ -473,6 +474,8 @@ window.BT_PROGRAM = {
     source: 'From swing video, Oct 31',
     defaultStart: '2026-11-02',
     bats: 'right-handed',
+    blockLabel: 'Hitting fix',
+    wedSlot: 'Runs as item 3 of Wednesday’s Session B baseball block (~10 min).',
     intro:
       'From the rear and first-base-side front-toss video (John Andrew bats right-handed). This block replaces general tee swings in Wednesday’s baseball time, about 10 minutes.',
     keep: 'Wide athletic stance, straight stride, front foot down on time, good back-foot pivot, strong two-hand finish.',
@@ -487,6 +490,7 @@ window.BT_PROGRAM = {
     refilm: {
       from: '2026-11-21',
       to: '2026-11-28',
+      label: 'first-base side',
       detail:
         'Around Nov 21–28, film 10–15 front-toss swings from the first-base side, facing his chest and hands, at hip height and the same distance as before. Add a rear view if you can. Send it over and we will compare the hand load and bat path to the Oct 31 video.'
     },
@@ -619,6 +623,143 @@ window.BT_PROGRAM = {
         links: [
           { title: 'The Fence Drill - Baseball Hitting Drills & Mechanics', site: 'YouTube · Baseball Tutorials', href: 'https://www.youtube.com/watch?v=3RyLpYSzjsQ' },
           { title: 'Top 10 Hitting Drills To Develop The Perfect Baseball Swing (includes a fence drill)', site: 'YouTube · YouGoProBaseball', href: 'https://www.youtube.com/watch?v=qU11jWWQCA8' }
+        ]
+      }
+    ]
+  },
+
+  /** John Andrew throwing fixes — from the Page section "Throwing Fixes (from throwing video, Oct 31)" */
+  throwing: {
+    title: 'Throwing Fixes',
+    source: 'From throwing video, Oct 31',
+    defaultStart: '2026-11-02',
+    throws: 'right-handed',
+    blockLabel: 'Throwing fix',
+    wedSlot: 'Runs at the start of item 1 (catch / throw) of Wednesday’s Session B baseball block (~10 min), then 8–12 easy throws.',
+    intro:
+      'From the Oct 31 throwing video (John Andrew throws right-handed). Fix three things, in this order. About 10 minutes before regular catch on baseball days.',
+    keep: 'A full, loose arm circle with real intent (no short-arming), and a consistent high three-quarter release that gives him accuracy and good carry.',
+    problems: [
+      { title: 'Glove arm flies open', detail: 'He steps slightly open, the glove arm flies out to the left, and the front shoulder opens early, so there is almost no hip and shoulder separation.' },
+      { title: 'Back leg doesn’t come through', detail: 'The back leg kicks up and back or out to the right instead of coming through. He should finish chest square to the target with the right foot even with or past the left.' },
+      { title: 'Elbow slightly low at foot strike', detail: 'The elbow is slightly below shoulder height at foot strike, so he pushes the ball a little.' }
+    ],
+    cues: 'Step at the target. Glove to the chest. Belly button to the target.',
+    safety: 'Keep throws easy (about 60–70%) during drills: the goal is the position, not velocity. One cue at a time, and stop if his arm is sore.',
+    gripNote: 'His grip could not be seen in the video, so check it in person (optional grip video in the drills below).',
+    rule: 'One cue at a time. Keep drill throws around 60–70% effort, and stop if his arm is sore.',
+    refilm: {
+      from: '2026-11-21',
+      to: '2026-11-28',
+      label: 'glove side + rear + grip',
+      detail:
+        'Around Nov 21–28, film 10–15 throws at regular catch distance from two angles: a side view from his glove side (to see the glove, front shoulder, and elbow height at foot strike) and a rear view from behind him looking at the target (to see the step direction and where the back leg finishes). Add a quick close-up of his grip. Send it over and we will compare it to the Oct 31 video.'
+    },
+    phases: [
+      {
+        key: 'p1', weeks: '1–2', fromWeek: 1, toWeek: 2,
+        main: 'Glove-to-chest one-knee throws + line drill',
+        supporting: 'Glove into the chest; step on the line, not open',
+        drills: ['oneknee', 'line'],
+        exercises: [
+          { id: 'tf-oneknee', name: 'One-knee glove-to-chest throws', kind: 'check', sets: 2, note: '2×10 easy · right knee down · 20–30 ft' },
+          { id: 'tf-line', name: 'Line drill — step on the line', kind: 'check', sets: 2, note: '2×8–10 · foot left of the line doesn’t count' }
+        ]
+      },
+      {
+        key: 'p2', weeks: '3–4', fromWeek: 3, toWeek: 4,
+        main: 'Power position (T) drill + throw and chase',
+        supporting: 'Elbow at shoulder height; belly button to the target, back leg comes through',
+        drills: ['tdrill', 'chase'],
+        exercises: [
+          { id: 'tf-tdrill', name: 'Power position “T” throws', kind: 'check', sets: 2, note: '2×8 · 2-count hold, elbow at shoulder height' },
+          { id: 'tf-chase', name: 'Throw and chase', kind: 'check', sets: 2, note: '2×8 · jog past the cone' }
+        ]
+      },
+      {
+        key: 'p3', weeks: '5+', fromWeek: 5, toWeek: null,
+        main: 'Regular catch, one cue per session',
+        supporting: 'Use the 4 drills as a 3–5 min warm-up rotation',
+        drills: ['oneknee', 'line', 'tdrill', 'chase'],
+        exercises: [
+          { id: 'tf-warmup', name: '4-drill warm-up rotation', kind: 'check', sets: 1, note: '3–5 min · one-knee, line, T, throw and chase' },
+          { id: 'tf-onecue', name: 'Regular catch with one cue', kind: 'check', sets: 1, note: 'pick one: step at the target / glove to the chest / belly button to the target' }
+        ]
+      }
+    ],
+    drills: [
+      {
+        key: 'oneknee', n: 1,
+        title: 'Glove-to-chest one-knee throws',
+        weeksLabel: 'weeks 1–2',
+        steps: [
+          { title: 'Setup', detail: 'Right knee down, left knee up and pointing at you, 20–30 ft apart. Start with the ball in the glove at chest height and his front (left) shoulder turned toward you.' },
+          { title: 'Reps (2 sets × 10 easy throws)', detail: 'Break the hands, point the glove at the target, then pull the glove straight into the chest as the arm comes through, and finish with the throwing hand across to the outside of the left knee. Pause at the break for the first few reps to check positions.' },
+          { title: 'Cues (pick one)', detail: 'Pull the glove into your chest. Hug yourself. Front shoulder points at the target.' },
+          { title: 'What good looks like', detail: 'The glove ends tucked at the chest, not flying out to the left, and the front shoulder stays pointed at you until the arm comes through. Throws arrive chest-high without him leaning or falling to the side.' }
+        ],
+        links: [
+          { title: 'The first part of our throwing routine - Glove Knee Down', site: 'YouTube · Antonelli Baseball', href: 'https://www.youtube.com/watch?v=X1BNt4x9Qok' },
+          { title: 'One Knee - Arm Follow Through', site: 'YouTube · allshoreba', href: 'https://www.youtube.com/watch?v=UvgdeoQYD2Q' },
+          { title: 'One Knee Drill (Coach Gerry Novak)', site: 'MLB.com · Chicago White Sox', href: 'https://www.mlb.com/whitesox/video/one-knee-drill' }
+        ]
+      },
+      {
+        key: 'line', n: 2,
+        title: 'Line drill — step at the target, not open',
+        weeksLabel: 'weeks 1–2',
+        steps: [
+          { title: 'Setup', detail: 'Lay a rope, chalk line, or bat on the ground pointing straight at you. He stands sideways with both feet on or straddling the line, left shoulder toward you, 30–40 ft away.' },
+          { title: 'Reps (2 sets × 8–10)', detail: 'He strides and the left foot lands on the line or just across it (slightly closed), never to the left of it. Throw, then look down to check the foot. Any rep with the foot left of the line does not count.' },
+          { title: 'Cues (pick one)', detail: 'Step on the line. Toe at the target. Glove into the chest.' },
+          { title: 'What good looks like', detail: 'The front foot lands on the line with the toe pointed at the target, hips stay closed a beat longer, and the front shoulder stays in until the arm comes through, so the hips turn before the shoulders.' }
+        ],
+        links: [
+          { title: 'Teach Your Kid to Pitch Baseball - T Drill (directional line + landing line)', site: 'YouTube · BC Network Media', href: 'https://www.youtube.com/watch?v=fqngqg4D03A' },
+          { title: 'Pitching: Step Behind Drill (staying in line with the target)', site: 'YouTube · Figure It Out Baseball', href: 'https://www.youtube.com/watch?v=UxzJRr6pLbo' }
+        ]
+      },
+      {
+        key: 'tdrill', n: 3,
+        title: 'Power position (T) drill — elbow at shoulder height',
+        weeksLabel: 'weeks 3–4, then warm-up',
+        steps: [
+          { title: 'Setup', detail: 'Standing sideways to the target in his stride, feet already apart, about 30 ft away. Glove arm points at the target, throwing arm up and back with the elbow at shoulder height and the ball facing away from you, so his arms make a T.' },
+          { title: 'Reps (2 sets × 8)', detail: 'Hold the T for a 2-count while you check the elbow (level with the shoulder, not below), then rotate the hips, pull the glove in, and throw. Add a gentle step once the position looks right.' },
+          { title: 'Cues (pick one)', detail: 'Make a T. Elbow up to the shoulder. Show the ball to the shortstop.' },
+          { title: 'What good looks like', detail: 'At the pause his elbows are level with his shoulders. The hips start the turn, the arm comes through over the top of the elbow, and the ball comes out on a line instead of being pushed.' }
+        ],
+        links: [
+          { title: 'Power Position Baseball Pitching Drill 9-19u', site: 'YouTube Shorts · ARM Pitching Development', href: 'https://www.youtube.com/shorts/uHE3w3z9ENw' },
+          { title: 'Throwing Drills For Youth Players (the T pose)', site: 'baseballbible.net (article)', href: 'https://www.baseballbible.net/throwing-drills-for-youth-players/' }
+        ]
+      },
+      {
+        key: 'chase', n: 4,
+        title: 'Throw and chase — back leg comes through',
+        weeksLabel: 'weeks 3–4, then warm-up',
+        steps: [
+          { title: 'Setup', detail: 'Regular catch stance, 40–50 ft apart. Set a cone or glove 3–4 steps in front of him toward the target.' },
+          { title: 'Reps (2 sets × 8)', detail: 'Throw, then let the back (right) leg swing through and keep moving, jogging after the throw until he passes the cone. Next round, just throw and freeze at the finish to check his feet.' },
+          { title: 'Cues (pick one)', detail: 'Belly button to the target. Chase your throw. Right foot catches up.' },
+          { title: 'What good looks like', detail: 'At the finish his chest and belly button face you and the right foot lands even with or past the left, not kicked up behind him or out to the right. The throwing hand finishes across to the outside of the left leg.' }
+        ],
+        links: [
+          { title: 'Finishing Pitches Like a Pro With This Follow Through Drill', site: 'YouTube · Figure It Out Baseball', href: 'https://www.youtube.com/watch?v=caKHZl_J8KY' },
+          { title: 'Follow Through Drill for Young Pitchers', site: 'YouTube Shorts · ThrowMo', href: 'https://www.youtube.com/shorts/zmtgRaMP4ic' }
+        ]
+      },
+      {
+        key: 'grip', n: '+',
+        title: 'Optional: check his grip (4-seam)',
+        weeksLabel: 'optional · check in person any time',
+        steps: [
+          { title: 'Grip', detail: 'Index and middle fingers across the wide seams, thumb underneath, ball out in the fingertips with a small gap from the palm. With small hands, three fingers on top is fine.' },
+          { title: 'Habit', detail: 'Have him grab the ball from the glove the same way each time.' }
+        ],
+        links: [
+          { title: 'Is Your Player Holding the Ball Wrong? Watch This', site: 'YouTube · Coach Beede', href: 'https://www.youtube.com/watch?v=K0l51mvsodI' },
+          { title: 'Youth Baseball Essentials: Simple Throwing Progressions', site: 'YouTube · Dominate The Diamond', href: 'https://www.youtube.com/watch?v=LtzwCrthlTY' }
         ]
       }
     ]
